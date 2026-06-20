@@ -1,0 +1,2237 @@
+<!DOCTYPE html>
+<html lang="en" class="transition-colors duration-300">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anesthesia MD</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Plus Jakarta Sans (Modern UI / Max Readability) -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        slate: {
+                            850: '#111812',
+                            900: '#0a0f0b',
+                            950: '#040604',
+                        },
+                        brand: {
+                            50: '#f3f6f3',
+                            100: '#e1e9e2',
+                            200: '#c5d3c7',
+                            500: '#415a42', // Olive Green
+                            600: '#2f3e2f', 
+                            700: '#1d261d', 
+                            900: '#0e140e',
+                        },
+                        accent: {
+                            100: '#f5ebcf',
+                            400: '#bca172', // Light Tan Gold
+                            500: '#a07855', // Chestnut Tan
+                            600: '#826040',
+                        },
+                        neutralPaper: {
+                            50: '#f9f8f3',  // Light warm linen
+                            100: '#f4f0e3', // Sand Ivory
+                            200: '#eae2cf', // Warm Beige
+                            300: '#dfd6c4', // Muted Clay
+                        }
+                    },
+                    animation: {
+                        'pulse-glow': 'pulseGlow 2s infinite alternate',
+                    },
+                    keyframes: {
+                        pulseGlow: {
+                            '0%': { boxShadow: '0 0 5px rgba(65, 90, 66, 0.2)' },
+                            '100%': { boxShadow: '0 0 15px rgba(65, 90, 66, 0.5)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        [x-cloak] { display: none !important; }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .dark ::-webkit-scrollbar-track {
+            background: #040604;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #dfd6c4;
+            border-radius: 6px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #2f3e2f;
+        }
+        .fade-in {
+            animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .textbook-card {
+            box-shadow: 0 4px 20px rgba(65, 90, 66, 0.04);
+        }
+        .dark .textbook-card {
+            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.4);
+        }
+        .textbook-card:hover {
+            box-shadow: 0 8px 30px rgba(65, 90, 66, 0.08);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body class="bg-neutralPaper-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans h-screen overflow-hidden transition-colors duration-300"
+      x-data="studyApp()" 
+      x-init="initApp()"
+      :class="isDarkMode ? 'dark' : ''">
+
+    <!-- App Shell Container -->
+    <div class="flex flex-col xl:flex-row h-screen w-screen overflow-hidden">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="w-full xl:w-80 h-full flex flex-col justify-between shrink-0 bg-[#f4f0e3] dark:bg-slate-900 border-b xl:border-b-0 xl:border-r border-neutralPaper-300 dark:border-slate-800 transition-colors duration-300 z-30 overflow-hidden">
+            <div class="flex flex-col h-full overflow-hidden">
+                <!-- Brand / Exam Identity -->
+                <div class="p-6 border-b border-neutralPaper-300 dark:border-slate-800 flex items-center justify-between shrink-0">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-brand-500 to-accent-500 flex items-center justify-center text-white shadow-md">
+                            <i class="fa-solid fa-stethoscope text-xl"></i>
+                        </div>
+                        <div>
+                            <h1 class="font-extrabold text-lg leading-tight tracking-tight text-slate-900 dark:text-white">Anesthesia MD</h1>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest">FRCA & EDAIC Preparation</p>
+                        </div>
+                    </div>
+                    <!-- Theme Toggle Switch -->
+                    <button @click="toggleTheme()" class="p-2 rounded-xl bg-neutralPaper-200/50 dark:bg-slate-800 hover:bg-neutralPaper-50 dark:hover:bg-slate-700 transition" title="Toggle Light/Dark Theme">
+                        <i class="fa-solid text-sm" :class="isDarkMode ? 'fa-sun text-amber-400' : 'fa-moon text-brand-500'"></i>
+                    </button>
+                </div>
+
+                <!-- Navigation List (Scrolls independently of bottom widgets) -->
+                <nav class="flex-1 overflow-y-auto p-4 space-y-1.5">
+                    <button @click="currentTab = 'dashboard'" :class="currentTab === 'dashboard' ? 'bg-brand-50 dark:bg-slate-800 text-brand-700 dark:text-white font-bold shadow-sm border border-brand-500/10' : 'text-slate-650 dark:text-slate-400 hover:bg-neutralPaper-100 dark:hover:bg-slate-800/40'" class="w-full flex items-center space-x-3.5 px-4 py-3.5 rounded-xl transition">
+                        <i class="fa-solid fa-chart-pie w-5 text-center text-brand-600 dark:text-brand-500"></i>
+                        <span class="text-sm font-bold">Dashboard Analytics</span>
+                    </button>
+                    <button @click="currentTab = 'syllabus'" :class="currentTab === 'syllabus' ? 'bg-brand-50 dark:bg-slate-800 text-brand-700 dark:text-white font-bold shadow-sm border border-brand-500/10' : 'text-slate-650 dark:text-slate-400 hover:bg-neutralPaper-100 dark:hover:bg-slate-800/40'" class="w-full flex items-center space-x-3.5 px-4 py-3.5 rounded-xl transition">
+                        <i class="fa-solid fa-book-medical w-5 text-center text-brand-600 dark:text-[#8ea68c]"></i>
+                        <span class="text-sm font-bold">Curriculum Chapters</span>
+                    </button>
+                    <button @click="currentTab = 'planner'" :class="currentTab === 'planner' ? 'bg-brand-50 dark:bg-slate-800 text-brand-700 dark:text-white font-bold shadow-sm border border-brand-500/10' : 'text-slate-650 dark:text-slate-400 hover:bg-neutralPaper-100 dark:hover:bg-slate-800/40'" class="w-full flex items-center space-x-3.5 px-4 py-3.5 rounded-xl transition">
+                        <i class="fa-solid fa-calendar-check w-5 text-center text-accent-500"></i>
+                        <span class="text-sm font-bold">Revision Scheduler</span>
+                    </button>
+                    <button @click="currentTab = 'resources'" :class="currentTab === 'resources' ? 'bg-brand-50 dark:bg-slate-800 text-brand-700 dark:text-white font-bold shadow-sm border border-brand-500/10' : 'text-slate-650 dark:text-slate-400 hover:bg-neutralPaper-100 dark:hover:bg-slate-800/40'" class="w-full flex items-center space-x-3.5 px-4 py-3.5 rounded-xl transition">
+                        <i class="fa-solid fa-graduation-cap w-5 text-center text-brand-650 dark:text-brand-450"></i>
+                        <span class="text-sm font-bold">Trusted Resources</span>
+                    </button>
+                </nav>
+
+                <!-- Fixed Bottom Widgets (Guaranteed to remain visible on all viewports) -->
+                <div class="p-4 border-t border-neutralPaper-300 dark:border-slate-800 space-y-3 shrink-0 bg-neutralPaper-100/50 dark:bg-slate-950/30">
+                    <!-- Session Active Stopwatch & Local Clock -->
+                    <div class="bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-neutralPaper-300 dark:border-slate-800/60 space-y-1.5 shadow-sm">
+                        <div class="flex justify-between items-center text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                            <span>Active Session</span>
+                            <span x-text="currentTimeString">12:00 PM</span>
+                        </div>
+                        <div class="flex items-baseline space-x-1.5">
+                            <span class="text-xl font-mono font-black text-slate-900 dark:text-white" x-text="formatStopwatch(stopwatchSeconds)">00:00:00</span>
+                            <span class="text-[10px] text-slate-550 dark:text-slate-450 font-bold">elapsed</span>
+                        </div>
+                    </div>
+
+                    <!-- Session/Daily Study Streak Widget -->
+                    <div class="bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-neutralPaper-300 dark:border-slate-800/60 flex justify-between items-center shadow-sm">
+                        <div>
+                            <span class="text-[9px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider block">Revision Streak</span>
+                            <span class="text-base font-extrabold text-slate-900 dark:text-white" x-text="streakCount + ' Days'">1 Day</span>
+                        </div>
+                        <button @click="incrementStreak()" class="w-9 h-9 rounded-xl bg-orange-100 dark:bg-orange-950/45 text-orange-500 flex items-center justify-center transition hover:scale-105 active:scale-95" title="Log study block for today">
+                            <i class="fa-solid fa-fire text-lg"></i>
+                        </button>
+                    </div>
+
+                    <!-- Focus Pomodoro System -->
+                    <div class="bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-neutralPaper-300 dark:border-slate-800/60 space-y-3 shadow-sm" :class="pomoActive ? 'animate-pulse-glow border-brand-500/40' : ''">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[9px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider">Focus Pomodoro</span>
+                            <span class="text-[10px] font-bold text-brand-600 dark:text-brand-400 uppercase tracking-wider" x-text="pomoMode === 'work' ? 'Reviewing' : 'Break'"></span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xl font-mono font-bold text-slate-900 dark:text-white" x-text="formatTime(pomoMinutes, pomoSeconds)">25:00</span>
+                            <div class="flex space-x-1">
+                                <button @click="togglePomo()" class="p-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-850 text-slate-655 dark:text-slate-300 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-850 transition">
+                                    <i class="fa-solid text-xs animate-none" :class="pomoActive ? 'fa-pause' : 'fa-play'"></i>
+                                </button>
+                                <button @click="resetPomo()" class="p-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-850 text-slate-400 hover:text-slate-655 dark:hover:text-slate-300 rounded-xl transition">
+                                    <i class="fa-solid fa-redo text-xs animate-none"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-1 pt-1.5 border-t border-slate-100 dark:border-slate-800/80">
+                            <button @click="setPomoPreset(25)" class="text-[9px] font-bold uppercase tracking-wider py-1 bg-slate-50 dark:bg-slate-950 hover:bg-brand-50 dark:hover:bg-slate-800 rounded text-slate-500 dark:text-slate-400">25m</button>
+                            <button @click="setPomoPreset(45)" class="text-[9px] font-bold uppercase tracking-wider py-1 bg-slate-50 dark:bg-slate-950 hover:bg-brand-50 dark:hover:bg-slate-800 rounded text-slate-500 dark:text-slate-400">45m</button>
+                            <button @click="setPomoPreset(60)" class="text-[9px] font-bold uppercase tracking-wider py-1 bg-slate-50 dark:bg-slate-950 hover:bg-brand-50 dark:hover:bg-slate-800 rounded text-slate-500 dark:text-slate-400">60m</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 flex flex-col h-full bg-[#fbfbf6] dark:bg-slate-950 transition-colors duration-300 overflow-y-auto">
+            <!-- Global Dashboard Header -->
+            <header class="h-16 border-b border-neutralPaper-300 dark:border-slate-800 px-6 flex items-center justify-between bg-[#fbfbf6]/60 dark:bg-slate-900/60 backdrop-blur-md transition-colors z-20 shrink-0">
+                <div class="flex items-center space-x-4 w-full max-w-lg">
+                    <div class="relative w-full">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 dark:text-slate-500">
+                            <i class="fa-solid fa-magnifying-glass text-xs animate-none"></i>
+                        </span>
+                        <input type="text" 
+                               x-model="searchQuery" 
+                               @input="currentTab = searchQuery ? 'syllabus' : currentTab"
+                               placeholder="Search loops, parameters, drug pathways, or textbook chapters..." 
+                               class="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-950 border border-neutralPaper-300 dark:border-slate-800 rounded-xl text-xs placeholder-slate-400 dark:placeholder-slate-500 text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-brand-500 transition">
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3.5 ml-4">
+                    <button @click="exportSyllabusData()" class="text-xs font-semibold text-slate-655 dark:text-slate-400 hover:text-brand-500 dark:hover:text-[#8ea68c] transition" title="Backup notes and state to local JSON file">
+                        <i class="fa-solid fa-file-export mr-1"></i> Export notes
+                    </button>
+                    <label class="text-xs font-semibold text-slate-655 dark:text-slate-400 hover:text-indigo-500 dark:hover:text-indigo-400 cursor-pointer transition" title="Restore notes and progress">
+                        <i class="fa-solid fa-file-import mr-1"></i> Import notes
+                        <input type="file" @change="importSyllabusData($event)" class="hidden">
+                    </label>
+                </div>
+            </header>
+
+            <!-- TAB 1: Dashboard Analytics -->
+            <div class="flex-1 p-6 fade-in shadow-sm" x-show="currentTab === 'dashboard'" x-transition>
+                <div class="max-w-7xl mx-auto space-y-6">
+                    <div class="flex justify-between items-center border-b border-neutralPaper-300 dark:border-slate-800 pb-4">
+                        <div>
+                            <h2 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Revision Analytics Overview</h2>
+                            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1.5">Study metrics, planned deadlines, and calculated pacing targets [1].</p>
+                        </div>
+                    </div>
+
+                    <!-- Statistics Cards -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="bg-white dark:bg-slate-900 border border-neutralPaper-300 dark:border-slate-800 rounded-2xl p-6 relative overflow-hidden transition-colors">
+                            <span class="text-xs text-slate-450 dark:text-slate-400 font-bold uppercase tracking-wider block">Total Progress</span>
+                            <div class="flex items-baseline space-x-2 mt-2">
+                                <span class="text-3xl font-black text-slate-900 dark:text-white" x-text="completionPercentage + '%'">0%</span>
+                                <span class="text-xs text-emerald-600 dark:text-emerald-400 font-bold">Mastered</span>
+                            </div>
+                            <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 mt-4 overflow-hidden">
+                                <div class="bg-gradient-to-r from-brand-600 to-accent-500 h-1.5 rounded-full transition-all duration-500" :style="`width: ${completionPercentage}%`"></div>
+                            </div>
+                        </div>
+                        <div class="bg-white dark:bg-slate-900 border border-neutralPaper-300 dark:border-slate-800 rounded-2xl p-6 transition-colors">
+                            <span class="text-xs text-slate-450 dark:text-slate-400 font-bold uppercase tracking-wider block">In Progress</span>
+                            <p class="text-3xl font-black text-amber-500 mt-2" x-text="inProgressCount"></p>
+                            <span class="text-[10px] text-slate-550 dark:text-slate-450 block mt-1.5">Syllabus nodes actively studied</span>
+                        </div>
+                        <div class="bg-white dark:bg-slate-900 border border-neutralPaper-300 dark:border-slate-800 rounded-2xl p-6 transition-colors">
+                            <span class="text-xs text-slate-450 dark:text-slate-400 font-bold uppercase tracking-wider block">Unexplored</span>
+                            <p class="text-3xl font-black text-rose-500 mt-2" x-text="todoCount"></p>
+                            <span class="text-[10px] text-slate-550 dark:text-slate-450 block mt-1.5">Topics requiring initial preparation</span>
+                        </div>
+                        <div class="bg-white dark:bg-slate-900 border border-neutralPaper-300 dark:border-slate-800 rounded-2xl p-6 transition-colors">
+                            <span class="text-xs text-slate-450 dark:text-slate-400 font-bold uppercase tracking-wider block">Study Records Written</span>
+                            <p class="text-3xl font-black text-brand-500 dark:text-[#8ea68c] mt-2" x-text="notesCount"></p>
+                            <span class="text-[10px] text-slate-550 dark:text-slate-450 block mt-1.5">Saved clinical summaries</span>
+                        </div>
+                    </div>
+
+                    <!-- Progress Charting & Upcoming Pipeline -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Chart Widget -->
+                        <div class="lg:col-span-2 bg-white dark:bg-slate-900 border border-neutralPaper-300 dark:border-slate-800 rounded-2xl p-6 transition-colors">
+                            <h3 class="font-bold text-sm text-slate-900 dark:text-slate-300 mb-4">Syllabus Mastery Distribution</h3>
+                            <div class="h-64 flex items-center justify-center relative">
+                                <canvas id="progressRadialChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Pipeline of upcoming scheduled topics -->
+                        <div class="bg-white dark:bg-slate-900 border border-neutralPaper-300 dark:border-slate-800 rounded-2xl p-6 flex flex-col justify-between transition-colors">
+                            <div>
+                                <h3 class="font-bold text-sm text-slate-900 dark:text-slate-300 mb-4">Upcoming Revision Milestones</h3>
+                                <div class="space-y-3 overflow-y-auto max-h-52 pr-1">
+                                    <template x-for="item in scheduledItems" :key="item.id">
+                                        <div class="bg-slate-50 dark:bg-slate-950 p-3.5 rounded-xl border border-neutralPaper-200 dark:border-slate-850 flex justify-between items-center text-xs">
+                                            <div>
+                                                <p class="font-bold text-slate-800 dark:text-slate-250 text-sm" x-text="item.topic"></p>
+                                                <span class="text-[10px] text-slate-500 dark:text-slate-450 font-semibold" x-text="item.scheduledDate"></span>
+                                            </div>
+                                            <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-brand-100 dark:bg-brand-900/30 text-brand-600 dark:text-brand-400" x-text="item.domain"></span>
+                                        </div>
+                                    </template>
+                                    <template x-if="scheduledItems.length === 0">
+                                        <div class="py-10 text-center text-slate-400 dark:text-slate-500 flex flex-col items-center">
+                                            <i class="fa-regular fa-calendar-check text-2xl mb-2 text-slate-300 dark:text-slate-700"></i>
+                                            <p class="text-xs">No pending milestones in schedule.</p>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                            <button @click="currentTab = 'planner'" class="w-full text-center bg-slate-100 dark:bg-slate-950 hover:bg-slate-200/50 dark:hover:bg-slate-850 text-slate-750 dark:text-slate-350 py-2.5 rounded-xl text-xs border border-neutralPaper-300 dark:border-slate-800 transition font-bold mt-4">
+                                View Full Planner Calendar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: Book-style Syllabus Chapters -->
+            <div class="flex-1 p-6 fade-in" x-show="currentTab === 'syllabus'" x-transition>
+                <div class="max-w-7xl mx-auto space-y-6">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0 border-b border-neutralPaper-300 dark:border-slate-800 pb-4">
+                        <div>
+                            <h2 class="text-4xl font-extrabold text-slate-950 dark:text-white tracking-tight">Curriculum Chapters</h2>
+                            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed italic">
+                                Structured chapters built directly around Miller’s Anesthesia 10e, Morgan & Mikhail’s Clinical Anesthesiology, and Dorsch & Dorsch.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Custom Topic Creator module -->
+                    <div class="bg-white dark:bg-slate-900 border border-neutralPaper-300 dark:border-slate-800 rounded-2xl p-5 flex flex-col md:flex-row justify-between items-center gap-4 transition-colors shadow-sm">
+                        <div class="text-center md:text-left">
+                            <h3 class="font-bold text-sm text-slate-900 dark:text-white">Add Custom Chapter Module</h3>
+                            <p class="text-[11px] text-slate-550 dark:text-slate-450 mt-0.5">Customize the master exam database to include local guidelines or specific clinical areas.</p>
+                        </div>
+                        <button @click="isTopicCreatorOpen = true" class="px-4 py-2 bg-[#4a6b51] dark:bg-[#5a8b63] hover:bg-[#3b5540] text-white rounded-xl text-xs font-bold transition shadow-sm">
+                            <i class="fa-solid fa-plus mr-1 text-[10px] animate-none"></i> Add Custom Module
+                        </button>
+                    </div>
+
+                    <!-- Group Topics into Chapters dynamically -->
+                    <div class="space-y-8">
+                        <template x-for="ch in chapters" :key="ch">
+                            <div class="space-y-4" x-show="getTopicsByChapter(ch).length > 0">
+                                <h3 class="text-xl font-bold text-[#3b5540] dark:text-[#8ea68c] border-b border-neutralPaper-300 dark:border-slate-800 pb-2 flex justify-between items-center">
+                                    <span x-text="ch"></span>
+                                    <span class="text-xs font-semibold text-slate-400" x-text="getTopicsByChapter(ch).length + ' Modules'"></span>
+                                </h3>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    <!-- MODULES DISPLAYED ENTIRELY AS INTERACTIVE BUTTONS -->
+                                    <template x-for="item in getTopicsByChapter(ch)" :key="item.id">
+                                        <button @click="openSyllabusDrawer(item)" 
+                                                class="w-full text-left bg-white dark:bg-slate-900 border border-neutralPaper-300 dark:border-slate-800 rounded-2xl p-6 flex flex-col justify-between hover:border-slate-350 dark:hover:border-slate-700 transition-all duration-350 hover:-translate-y-1 textbook-card">
+                                            <div class="w-full">
+                                                <div class="flex justify-between items-start mb-3.5 w-full">
+                                                    <span class="text-[9px] font-bold uppercase tracking-wider bg-brand-50 dark:bg-slate-850 text-brand-600 dark:text-[#8ea68c] px-2.5 py-1 rounded-lg border border-brand-500/10" x-text="item.domain"></span>
+                                                    
+                                                    <!-- Status Indicators -->
+                                                    <span :class="{
+                                                        'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/60': item.status === 'Completed',
+                                                        'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800/60': item.status === 'In Progress',
+                                                        'bg-slate-100 dark:bg-slate-850 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-855': item.status === 'To Do'
+                                                    }" class="px-2.5 py-1 rounded-full text-[10px] font-bold border flex items-center space-x-1.5 transition">
+                                                        <span class="w-1.5 h-1.5 rounded-full" :class="{
+                                                            'bg-emerald-500': item.status === 'Completed',
+                                                            'bg-amber-500': item.status === 'In Progress',
+                                                            'bg-slate-400': item.status === 'To Do'
+                                                        }"></span>
+                                                        <span x-text="item.status"></span>
+                                                    </span>
+                                                </div>
+
+                                                <h4 class="font-extrabold text-lg text-slate-900 dark:text-white hover:text-brand-650 dark:hover:text-[#8ea68c] transition" x-text="item.topic"></h4>
+                                                <p class="text-[11px] italic font-semibold text-accent-500 dark:text-accent-400 mt-2" x-text="item.references"></p>
+                                            </div>
+
+                                            <div class="border-t border-slate-100 dark:border-slate-800/80 pt-4 flex items-center justify-between mt-5 w-full">
+                                                <span class="text-[10px] text-slate-450 dark:text-slate-500 font-bold flex items-center space-x-1.5">
+                                                    <i class="fa-solid fa-layer-group text-brand-500 animate-none"></i>
+                                                    <span x-text="getTotalSubtopics(item) + ' Core Points'"></span>
+                                                </span>
+                                                <span class="text-xs font-bold text-[#4a6b51] dark:text-[#8ea68c] hover:underline flex items-center space-x-1">
+                                                    <span>Open Workspace</span>
+                                                    <i class="fa-solid fa-chevron-right text-[10px] animate-none"></i>
+                                                </span>
+                                            </div>
+                                        </button>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: Custom Scheduler & Planner Goals -->
+            <div class="flex-1 p-6 fade-in shadow-sm" x-show="currentTab === 'planner'" x-transition>
+                <div class="max-w-4xl mx-auto space-y-6">
+                    <div class="border-b border-neutralPaper-300 dark:border-slate-800 pb-4">
+                        <h2 class="text-3xl font-bold text-slate-950 dark:text-white">Active Spacing Revision Calendar</h2>
+                        <p class="text-xs text-slate-550 dark:text-slate-400 mt-1">Configure study blocks, dead-lines, and weekly module goals [1].</p>
+                    </div>
+
+                    <!-- Custom Target Study Settings -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white dark:bg-slate-900 border border-neutralPaper-300 dark:border-slate-800 p-6 rounded-3xl shadow-sm transition-colors">
+                        <div class="space-y-4">
+                            <h3 class="font-bold text-base text-brand-600 dark:text-[#8ea68c]">Calculated Study Goals</h3>
+                            <div class="space-y-2 text-xs">
+                                <div class="flex justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
+                                    <span class="text-slate-500">Total Core Syllabus Topics:</span>
+                                    <strong x-text="syllabus.length"></strong>
+                                </div>
+                                <div class="flex justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
+                                    <span class="text-slate-500">Mastery Complete:</span>
+                                    <strong class="text-emerald-500" x-text="completedCount + ' (' + completionPercentage + '%)'"></strong>
+                                </div>
+                                <div class="flex justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
+                                    <span class="text-slate-500">Deadline Days Countdown:</span>
+                                    <strong class="text-rose-500" x-text="daysRemaining >= 0 ? daysRemaining + ' Days' : 'Past Deadline'"></strong>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-slate-500">Recommended Modules per Week:</span>
+                                    <strong class="text-brand-500" x-text="calculateWeeklyStudyGoal()"></strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Date Selection and targets configuration form -->
+                        <div class="space-y-4 flex flex-col justify-between">
+                            <div>
+                                <h3 class="font-bold text-base text-accent-500 dark:text-accent-400">Configure Study Schedule</h3>
+                                <div class="mt-4 space-y-3">
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Weekly Target Cap (Hours or Modules)</label>
+                                        <select x-model="weeklyStudyHours" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-slate-700 dark:text-slate-300 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500 transition">
+                                            <option value="2">2 Modules per Week</option>
+                                            <option value="4">4 Modules per Week</option>
+                                            <option value="6">6 Modules per Week</option>
+                                            <option value="8">8 Modules per Week</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <button @click="currentTab = 'syllabus'" class="w-full bg-[#4a6b51] hover:bg-[#3b5540] text-white text-xs font-bold py-2.5 rounded-xl transition shadow-sm">
+                                View Curriculum Table of Contents
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Date Scheduler form -->
+                    <div class="bg-white dark:bg-slate-900 border border-neutralPaper-300 dark:border-slate-800 p-6 rounded-3xl space-y-4 shadow-sm transition-colors">
+                        <h3 class="font-bold text-xs uppercase tracking-wider text-slate-400 dark:text-slate-500">Add Revision Window</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Target Module</label>
+                                <select x-model="plannerForm.id" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2.5 text-slate-700 dark:text-slate-300 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500 transition">
+                                    <option value="">-- Select Syllabus Topic --</option>
+                                    <template x-for="item in syllabus" :key="item.id">
+                                        <option :value="item.id" x-text="item.topic"></option>
+                                    </template>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Schedule Revision Date</label>
+                                <input type="date" x-model="plannerForm.date" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2.5 text-slate-700 dark:text-slate-300 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500 transition">
+                            </div>
+                            <div class="flex items-end">
+                                <button @click="scheduleItem()" class="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-2.5 rounded-xl transition text-xs shadow-sm">
+                                    Add Study Event
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Scheduler display list -->
+                    <div class="bg-white dark:bg-slate-900 border border-neutralPaper-300 dark:border-slate-800 rounded-3xl overflow-hidden shadow-sm transition-colors">
+                        <table class="w-full text-left text-xs text-slate-700 dark:text-slate-300">
+                            <thead class="bg-slate-50 dark:bg-slate-950 text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-slate-800 text-[10px] font-bold">
+                                <tr>
+                                    <th class="px-6 py-4">Syllabus Topic</th>
+                                    <th class="px-6 py-4">Syllabus Domain</th>
+                                    <th class="px-6 py-4">Revision Target Date</th>
+                                    <th class="px-6 py-4 text-right">Delete Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60">
+                                <template x-for="item in scheduledItems" :key="item.id">
+                                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-850/30 transition">
+                                        <td class="px-6 py-4 font-bold text-slate-900 dark:text-white" x-text="item.topic"></td>
+                                        <td class="px-6 py-4">
+                                            <span class="px-2 py-0.5 rounded-lg text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-brand-400" x-text="item.domain"></span>
+                                        </td>
+                                        <td class="px-6 py-4 text-slate-600 dark:text-slate-300" x-text="item.scheduledDate"></td>
+                                        <td class="px-6 py-4 text-right">
+                                            <button @click="unscheduleItem(item.id)" class="text-rose-500 hover:underline font-bold text-[10px]">Cancel Schedule</button>
+                                        </td>
+                                    </tr>
+                                </template>
+                                <template x-if="scheduledItems.length === 0">
+                                    <tr>
+                                        <td colspan="4" class="px-6 py-10 text-center text-slate-400 dark:text-slate-500">No scheduled study intervals. Choose a target topic in the form above.</td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 7: Consolidated Trusted Resources Matrix -->
+            <div class="flex-1 p-6 fade-in" x-show="currentTab === 'resources'" x-transition>
+                <div class="max-w-5xl mx-auto space-y-8">
+                    <div class="border-b border-neutralPaper-300 dark:border-slate-800 pb-4">
+                        <h2 class="text-3xl font-extrabold text-slate-900 dark:text-white">Trusted Study Resources Directory</h2>
+                        <p class="text-xs text-slate-555 dark:text-slate-455 mt-1 leading-relaxed">
+                            Consolidated list of RCoA / ESAIC primary board study platforms, including top-tier textbooks, video systems, and interactive tools.
+                        </p>
+                    </div>
+
+                    <!-- Free Open-Access Matrix -->
+                    <div class="space-y-4">
+                        <h3 class="text-xs font-sans uppercase font-bold tracking-widest text-[#4a6b51] dark:text-[#8ea68c] border-b border-neutralPaper-300 dark:border-slate-800 pb-2">Free Open-Access Academic Databases</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="bg-white dark:bg-slate-900 border border-neutralPaper-300 dark:border-slate-800 rounded-3xl p-6 flex flex-col justify-between shadow-sm">
+                                <div>
+                                    <div class="flex items-center space-x-3 mb-3">
+                                        <div class="w-9 h-9 rounded-xl bg-teal-100 dark:bg-teal-950/45 text-teal-600 dark:text-teal-400 flex items-center justify-center">
+                                            <i class="fa-solid fa-graduation-cap text-sm"></i>
+                                        </div>
+                                        <h4 class="font-bold text-base text-slate-900 dark:text-white">Deranged Physiology</h4>
+                                    </div>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
+                                        The most robust, clinically detailed physiological database online. Indispensable for Stewart physical-chemical acid-base mechanics and cardiac PV curves [1].
+                                    </p>
+                                </div>
+                                <a href="https://derangedphysiology.com" target="_blank" class="w-full text-center bg-teal-50 dark:bg-teal-950/40 hover:bg-teal-100 dark:hover:bg-teal-900/40 text-teal-700 dark:text-teal-455 py-2.5 rounded-xl border border-teal-200 dark:border-teal-800 transition text-xs font-bold">Visit Database <i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[10px] animate-none"></i></a>
+                            </div>
+
+                            <div class="bg-white dark:bg-slate-900 border border-neutralPaper-300 dark:border-slate-800 rounded-3xl p-6 flex flex-col justify-between shadow-sm">
+                                <div>
+                                    <div class="flex items-center space-x-3 mb-3">
+                                        <div class="w-9 h-9 rounded-xl bg-brand-100 dark:bg-brand-950/45 text-brand-600 dark:text-[#8ea68c] flex items-center justify-center">
+                                            <i class="fa-solid fa-book-open text-sm"></i>
+                                        </div>
+                                        <h4 class="font-bold text-base text-slate-900 dark:text-white">OpenAnesthesia</h4>
+                                    </div>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
+                                        The official IARS wiki study resource. High-yield reviews of clinical monitoring technology and local anesthetic profiles.
+                                    </p>
+                                </div>
+                                <a href="https://www.openanaesthesia.org" target="_blank" class="w-full text-center bg-brand-50 dark:bg-brand-950/40 hover:bg-brand-100 dark:hover:bg-brand-900/40 text-brand-700 dark:text-[#8ea68c] py-2.5 rounded-xl border border-brand-200 dark:border-brand-800 transition text-xs font-bold">Visit Database <i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[10px] animate-none"></i></a>
+                            </div>
+
+                            <div class="bg-white dark:bg-slate-900 border border-neutralPaper-300 dark:border-slate-800 rounded-3xl p-6 flex flex-col justify-between shadow-sm">
+                                <div>
+                                    <div class="flex items-center space-x-3 mb-3">
+                                        <div class="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-950/45 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                                            <i class="fa-solid fa-hospital-user text-sm"></i>
+                                        </div>
+                                        <h4 class="font-bold text-base text-slate-900 dark:text-white">BJA Education (BJAed)</h4>
+                                    </div>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed font-sans">
+                                        Factual, peer-reviewed clinical articles published directly with RCOA / ESAIC training targets in mind. Excellent for specific clinical measurement updates.
+                                    </p>
+                                </div>
+                                <a href="https://bjaed.org" target="_blank" class="w-full text-center bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 text-emerald-700 dark:text-emerald-450 py-2.5 rounded-xl border border-emerald-200 dark:border-emerald-800 transition text-xs font-bold">Visit Database <i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[10px] animate-none"></i></a>
+                            </div>
+
+                            <div class="bg-white dark:bg-slate-900 border border-neutralPaper-300 dark:border-slate-800 rounded-3xl p-6 flex flex-col justify-between shadow-sm">
+                                <div>
+                                    <div class="flex items-center space-x-3 mb-3">
+                                        <div class="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-950/45 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+                                            <i class="fa-solid fa-circle-nodes text-sm"></i>
+                                        </div>
+                                        <h4 class="font-bold text-base text-slate-900 dark:text-white">LITFL Critical Care</h4>
+                                    </div>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
+                                        Unmatched for intensive toxicology indices, metabolic shifting maps, and advanced electrocardiography. High yield for critical care.
+                                    </p>
+                                </div>
+                                <a href="https://litfl.com" target="_blank" class="w-full text-center bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/40 text-amber-700 dark:text-amber-450 py-2.5 rounded-xl border border-amber-200 dark:border-amber-800 transition text-xs font-bold">Visit Database <i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[10px] animate-none"></i></a>
+                            </div>
+
+                            <div class="bg-white dark:bg-slate-900 border border-neutralPaper-300 dark:border-slate-800 rounded-3xl p-6 flex flex-col justify-between shadow-sm">
+                                <div>
+                                    <div class="flex items-center space-x-3 mb-3">
+                                        <div class="w-9 h-9 rounded-xl bg-indigo-100 dark:bg-indigo-950/45 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+                                            <i class="fa-solid fa-compass-drafting text-sm"></i>
+                                        </div>
+                                        <h4 class="font-bold text-base text-slate-900 dark:text-white">NYSORA Regional Anesthesia</h4>
+                                    </div>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
+                                        The global gold standard for nerve block pathways, ultrasound-guided landmarks, local anesthetic toxicity calculations, and clinical regional training modules.
+                                    </p>
+                                </div>
+                                <a href="https://www.nysora.com" target="_blank" class="w-full text-center bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 text-indigo-700 dark:text-indigo-450 py-2.5 rounded-xl border border-indigo-200 dark:border-indigo-800 transition text-xs font-bold">Visit Database <i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[10px] animate-none"></i></a>
+                            </div>
+
+                            <div class="bg-white dark:bg-slate-900 border border-neutralPaper-300 dark:border-slate-800 rounded-3xl p-6 flex flex-col justify-between shadow-sm">
+                                <div>
+                                    <div class="flex items-center space-x-3 mb-3">
+                                        <div class="w-9 h-9 rounded-xl bg-violet-100 dark:bg-violet-950/45 text-violet-650 dark:text-violet-400 flex items-center justify-center">
+                                            <i class="fa-solid fa-scale-balanced text-sm"></i>
+                                        </div>
+                                        <h4 class="font-bold text-base text-slate-900 dark:text-white">Difficult Airway Society (DAS)</h4>
+                                    </div>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
+                                        Access critical guidelines for unanticipated difficult intubations, failed obstetric airways, extubation protocols, and emergency surgical FONA algorithms.
+                                    </p>
+                                </div>
+                                <a href="https://das.uk.com" target="_blank" class="w-full text-center bg-violet-50 dark:bg-violet-950/40 hover:bg-violet-100 dark:hover:bg-violet-900/40 text-violet-750 dark:text-violet-400 py-2.5 rounded-xl border border-violet-200 dark:border-violet-800 transition text-xs font-bold">Visit Database <i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[10px] animate-none"></i></a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recommended Premium Paid Databases -->
+                    <div class="space-y-4">
+                        <h3 class="text-xs font-sans uppercase font-bold tracking-widest text-[#a17858] border-b border-neutralPaper-300 dark:border-slate-800 pb-2">Highly Recommended Paid Platforms</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="bg-white dark:bg-slate-900 border border-neutralPaper-300 dark:border-slate-800 rounded-3xl p-6 flex flex-col justify-between shadow-sm">
+                                <div>
+                                    <div class="flex items-center space-x-3 mb-3">
+                                        <div class="w-9 h-9 rounded-xl bg-violet-100 dark:bg-violet-950/45 text-violet-600 dark:text-violet-400 flex items-center justify-center">
+                                            <i class="fa-solid fa-graduation-cap text-sm"></i>
+                                        </div>
+                                        <h4 class="font-bold text-base text-slate-900 dark:text-white">e-Learning for Anaesthesia (e-LA)</h4>
+                                    </div>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
+                                        The official Royal College of Anaesthetists (RCoA) training module portal. Extremely granular coverage of the primary exam physics, equipment, and clinical guidelines.
+                                    </p>
+                                </div>
+                                <span class="text-[10px] text-slate-400 italic block mb-2">Access: Free via NHS OpenAthens / Professional Subscription</span>
+                            </div>
+
+                            <div class="bg-white dark:bg-slate-900 border border-neutralPaper-300 dark:border-slate-800 rounded-3xl p-6 flex flex-col justify-between shadow-sm">
+                                <div>
+                                    <div class="flex items-center space-x-3 mb-3">
+                                        <div class="w-9 h-9 rounded-xl bg-orange-100 dark:bg-orange-950/45 text-orange-600 dark:text-orange-400 flex items-center justify-center">
+                                            <i class="fa-solid fa-book text-sm"></i>
+                                        </div>
+                                        <h4 class="font-bold text-base text-slate-900 dark:text-white">The Primary FRCA Oral Study Guide</h4>
+                                    </div>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
+                                        Written by Wijayasiri et al. The undisputed gold-standard study textbook containing pre-modeled oral exam dialogue structures.
+                                    </p>
+                                </div>
+                                <span class="text-[10px] text-slate-400 italic block mb-2">Available: Medical Bookstores & Online Booksellers</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- NOTES DRAWER / REVISION WORKSITE -->
+    <div x-show="isDrawerOpen" class="fixed inset-0 z-50 flex justify-end" x-cloak>
+        <!-- Overlay backdrop -->
+        <div x-show="isDrawerOpen" @click="closeSyllabusDrawer()" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm transition-opacity" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"></div>
+
+        <!-- Drawer Panel -->
+        <div x-show="isDrawerOpen" class="relative w-full max-w-2xl bg-[#faf9f5] dark:bg-slate-900 border-l border-neutralPaper-300 dark:border-slate-800 h-full overflow-y-auto flex flex-col p-6 shadow-2xl transition-colors" x-transition:enter="transform transition ease-in-out duration-300" x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transform transition ease-in-out duration-300" x-transition:leave-start="translate-x-0" x-transition:leave-end="translate-x-full">
+            
+            <!-- Drawer Header -->
+            <div class="flex items-center justify-between border-b border-neutralPaper-300 dark:border-slate-800 pb-4 mb-6 shrink-0">
+                <div>
+                    <span class="text-[9px] font-bold uppercase tracking-wider bg-[#eae7dc] dark:bg-slate-850 text-brand-600 dark:text-brand-400 px-2.5 py-1 rounded-lg" x-text="activeDrawerTopic.domain"></span>
+                    <h3 class="font-extrabold text-2xl text-slate-900 dark:text-white mt-2" x-text="activeDrawerTopic.topic"></h3>
+                    <p class="text-[11px] italic font-semibold text-accent-500 dark:text-accent-400 mt-1" x-text="'Ref: ' + activeDrawerTopic.references"></p>
+                </div>
+                <button @click="closeSyllabusDrawer()" class="text-slate-400 hover:text-slate-950 dark:hover:text-white p-2">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Content Workspace area -->
+            <div class="flex-1 space-y-6 overflow-y-auto pr-1">
+                <!-- High Yield Deconstructions -->
+                <div class="space-y-5">
+                    <!-- Section 1: Physiology -->
+                    <template x-if="activeDrawerTopic.sections && activeDrawerTopic.sections.physiology">
+                        <div class="bg-white dark:bg-slate-950 border border-neutralPaper-300 dark:border-slate-800/80 p-5 rounded-2xl">
+                            <h4 class="text-[11px] font-bold text-slate-405 dark:text-slate-500 uppercase tracking-widest mb-3 flex items-center space-x-1.5">
+                                <i class="fa-solid fa-heart-pulse text-brand-500"></i>
+                                <span>Core Physiology Concepts</span>
+                            </h4>
+                            <ul class="space-y-3 text-sm text-slate-800 dark:text-slate-300 pl-1">
+                                <template x-for="p in activeDrawerTopic.sections.physiology" :key="p">
+                                    <li class="flex items-start space-x-2">
+                                        <span class="text-brand-500 mt-1">•</span>
+                                        <span class="leading-relaxed" x-text="p"></span>
+                                    </li>
+                                </template>
+                            </ul>
+                        </div>
+                    </template>
+
+                    <!-- Section 2: Pharmacology -->
+                    <template x-if="activeDrawerTopic.sections && activeDrawerTopic.sections.pharmacology">
+                        <div class="bg-white dark:bg-slate-950 border border-neutralPaper-300 dark:border-slate-800/80 p-5 rounded-2xl">
+                            <h4 class="text-[11px] font-bold text-slate-405 dark:text-slate-500 uppercase tracking-widest mb-3 flex items-center space-x-1.5">
+                                <i class="fa-solid fa-pills text-[#a37d65]"></i>
+                                <span>Core Pharmacology Mechanisms</span>
+                            </h4>
+                            <ul class="space-y-3 text-sm text-slate-800 dark:text-slate-300 pl-1">
+                                <template x-for="p in activeDrawerTopic.sections.pharmacology" :key="p">
+                                    <li class="flex items-start space-x-2">
+                                        <span class="text-[#a37d65] mt-1">•</span>
+                                        <span class="leading-relaxed" x-text="p"></span>
+                                    </li>
+                                </template>
+                            </ul>
+                        </div>
+                    </template>
+
+                    <!-- Section 3: Equipment/Measurement -->
+                    <template x-if="activeDrawerTopic.sections && activeDrawerTopic.sections.measurement">
+                        <div class="bg-white dark:bg-slate-950 border border-neutralPaper-300 dark:border-slate-800/80 p-5 rounded-2xl">
+                            <h4 class="text-[11px] font-bold text-slate-455 dark:text-slate-500 uppercase tracking-widest mb-3 flex items-center space-x-1.5">
+                                <i class="fa-solid fa-compass-drafting text-amber-500"></i>
+                                <span>Physics & Measurement Specifications</span>
+                            </h4>
+                            <ul class="space-y-3 text-sm text-slate-800 dark:text-slate-300 pl-1">
+                                <template x-for="p in activeDrawerTopic.sections.measurement" :key="p">
+                                    <li class="flex items-start space-x-2">
+                                        <span class="text-amber-500 mt-1">•</span>
+                                        <span class="leading-relaxed" x-text="p"></span>
+                                    </li>
+                                </template>
+                            </ul>
+                        </div>
+                    </template>
+
+                    <!-- Section 4: Clinical Implications -->
+                    <template x-if="activeDrawerTopic.sections && activeDrawerTopic.sections.clinical">
+                        <div class="bg-white dark:bg-slate-950 border border-neutralPaper-300 dark:border-slate-800/80 p-5 rounded-2xl">
+                            <h4 class="text-[11px] font-bold text-slate-455 dark:text-slate-500 uppercase tracking-widest mb-3 flex items-center space-x-1.5">
+                                <i class="fa-solid fa-stethoscope text-emerald-500"></i>
+                                <span>Key Clinical Implications</span>
+                            </h4>
+                            <ul class="space-y-3 text-sm text-slate-800 dark:text-slate-300 pl-1">
+                                <template x-for="p in activeDrawerTopic.sections.clinical" :key="p">
+                                    <li class="flex items-start space-x-2">
+                                        <span class="text-emerald-500 mt-1">•</span>
+                                        <span class="leading-relaxed" x-text="p"></span>
+                                    </li>
+                                </template>
+                            </ul>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Video Resource Center (Specific YouTube Links) -->
+                <div class="bg-white dark:bg-slate-950 border border-neutralPaper-300 dark:border-slate-800 p-5 rounded-2xl">
+                    <h4 class="text-[11px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-widest mb-3 flex items-center space-x-1.5 border-b border-slate-100 dark:border-slate-800 pb-2">
+                        <i class="fa-brands fa-youtube text-red-500"></i>
+                        <span>High-Yield Video Demonstrations</span>
+                    </h4>
+                    <div class="space-y-2">
+                        <a :href="`https://www.youtube.com/results?search_query=Count+Backwards+from+10+${encodeURIComponent(activeDrawerTopic.topic || '')}`" target="_blank" class="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-900 rounded-xl hover:bg-neutralPaper-100 dark:hover:bg-slate-800 transition">
+                            <div class="flex items-center space-x-3">
+                                <i class="fa-solid fa-video text-brand-500 animate-none"></i>
+                                <div>
+                                    <p class="text-xs font-bold text-slate-800 dark:text-slate-100">Count Backwards From 10 Review</p>
+                                    <p class="text-[9px] text-slate-500">Chalk talks and dynamic loops</p>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-chevron-right text-[10px] text-slate-400 animate-none"></i>
+                        </a>
+                        <a :href="`https://www.youtube.com/results?search_query=ABCs+of+Anaesthesia+${encodeURIComponent(activeDrawerTopic.topic || '')}`" target="_blank" class="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-900 rounded-xl hover:bg-neutralPaper-100 dark:hover:bg-slate-800 transition">
+                            <div class="flex items-center space-x-3">
+                                <i class="fa-solid fa-graduation-cap text-accent-500 animate-none"></i>
+                                <div>
+                                    <p class="text-xs font-bold text-slate-800 dark:text-slate-100">ABCs of Anaesthesia Lectures</p>
+                                    <p class="text-[9px] text-slate-555">Primary and Final board strategies</p>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-chevron-right text-[10px] text-slate-400 animate-none"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Custom Study Notes Area -->
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <h4 class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Clinical Study Records & Notes</h4>
+                        <span class="text-[9px] text-slate-450 dark:text-slate-500 font-semibold">Auto-saved to database [1]</span>
+                    </div>
+                    <textarea x-model="activeDrawerTopic.notes" @input="saveSyllabusToLocal()" rows="9" placeholder="Draft physiological mechanisms, drug profiles, specific clinical guidelines, or diagrams notes here..." class="w-full bg-white dark:bg-slate-950 border border-neutralPaper-300 dark:border-slate-850 rounded-2xl p-4 text-xs text-slate-800 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-brand-500 font-mono leading-relaxed resize-none transition-colors shadow-sm"></textarea>
+                </div>
+            </div>
+
+            <!-- Set Date inside drawer -->
+            <div class="mt-6 border-t border-slate-100 dark:border-slate-800 pt-4 shrink-0 animate-none">
+                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Set Revision Target Date</label>
+                <div class="flex space-x-2">
+                    <input type="date" x-model="drawerScheduleDate" class="flex-1 bg-slate-50 dark:bg-slate-950 border border-neutralPaper-300 dark:border-slate-800 rounded-xl px-3 py-2 text-slate-700 dark:text-slate-300 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500 transition">
+                    <button @click="scheduleFromDrawer()" class="bg-brand-600 hover:bg-brand-500 text-white font-bold px-4 py-2 rounded-xl transition text-xs shadow-sm">
+                        Schedule
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CUSTOM TOPIC CREATOR MODAL -->
+    <div x-show="isTopicCreatorOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4" x-cloak>
+        <div x-show="isTopicCreatorOpen" @click="isTopicCreatorOpen = false" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm transition-opacity" x-transition></div>
+        <div class="bg-white dark:bg-slate-900 border border-neutralPaper-300 dark:border-slate-800 rounded-3xl p-6 w-full max-w-md shadow-2xl z-55 relative transition-colors">
+            <h3 class="font-extrabold text-lg text-slate-900 dark:text-white mb-4">Add Custom Study Module</h3>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Domain Classification</label>
+                    <select x-model="newTopicForm.domain" class="w-full bg-slate-50 dark:bg-slate-950 border border-neutralPaper-300 dark:border-slate-800 rounded-xl px-3 py-2.5 text-slate-800 dark:text-slate-300 text-xs focus:outline-none transition">
+                        <option value="Basic Sciences">Basic Sciences</option>
+                        <option value="Clinical Anesthesia">Clinical Anesthesia</option>
+                        <option value="Intensive Care">Intensive Care</option>
+                        <option value="Pain Medicine">Pain Medicine</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Module Title</label>
+                    <input type="text" x-model="newTopicForm.topic" placeholder="e.g. Mechanical Vent in COPD" class="w-full bg-slate-50 dark:bg-slate-950 border border-neutralPaper-300 dark:border-slate-800 rounded-xl px-3 py-2.5 text-slate-800 dark:text-slate-300 text-xs focus:outline-none transition">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Key Subtopics (Comma Separated)</label>
+                    <textarea x-model="newTopicForm.subtopics" placeholder="Auto-peep mechanics, ventilatory targets, compliance adjustments" class="w-full bg-slate-50 dark:bg-slate-950 border border-neutralPaper-300 dark:border-slate-800 rounded-xl p-3 text-xs text-slate-850 dark:text-slate-300 focus:outline-none transition h-20 resize-none"></textarea>
+                </div>
+            </div>
+
+            <div class="mt-6 flex justify-end space-x-2">
+                <button @click="isTopicCreatorOpen = false" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-655 dark:text-slate-300 rounded-xl text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-750 transition">Cancel</button>
+                <button @click="createCustomSyllabusNode()" class="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold transition shadow-sm">Save Module</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alpine Script & Application Logic -->
+    <script>
+        function studyApp() {
+            return {
+                currentTab: 'dashboard',
+                searchQuery: '',
+                domainFilter: 'All',
+                isDarkMode: true,
+                isDrawerOpen: false,
+                isTopicCreatorOpen: false,
+                
+                // Initialize active topic with structural defaults to prevent uninitialized loops
+                activeDrawerTopic: { domain: '', topic: '', subtopics: [], notes: '', references: '', sections: { physiology: [], pharmacology: [], measurement: [], clinical: [] } },
+                drawerScheduleDate: '',
+                plannerForm: { id: '', date: '' },
+                chart: null,
+
+                streakCount: 1,
+                examDate: '2026-11-01',
+                daysRemaining: 0,
+                weeklyStudyHours: 4, // Default capacity used for estimating weekly goals
+                
+                // Dynamic Session stopwatch tracking
+                stopwatchSeconds: 0,
+                stopwatchInterval: null,
+                currentTimeString: '12:00:00 PM',
+
+                // Pomodoro state
+                pomoMinutes: 25,
+                pomoSeconds: 0,
+                pomoActive: false,
+                pomoMode: 'work',
+                pomoInterval: null,
+
+                // Oral Board Practice Timer State
+                vivaMinutes: 10,
+                vivaSeconds: 0,
+                vivaActive: false,
+                vivaInterval: null,
+
+                newTopicForm: {
+                    domain: 'Basic Sciences',
+                    topic: '',
+                    subtopics: ''
+                },
+
+                // Restructured Chronological Book Layout: Basics First -> Specialties -> Miscellaneous
+                chapters: [
+                    'Chapter 1: Autonomic & System Physiology',
+                    'Chapter 2: Essential Pharmacology',
+                    'Chapter 3: Physics & Anesthesia Equipment',
+                    'Chapter 4: Clinical Subspecialty Anesthesia',
+                    'Chapter 5: Regional Anesthesia & Block Anatomy',
+                    'Chapter 6: Trauma, Coagulation & Intensive Care',
+                    'Chapter 7: Statistical Methods, Safety & Systems'
+                ],
+
+                domains: [
+                    'Basic Sciences',
+                    'Clinical Anesthesia',
+                    'Intensive Care',
+                    'Pain Medicine'
+                ],
+
+                // Expanded textbook subdivided database mapping Miller 10e, M&M 7e and D&D Ch 5 [1]
+                syllabus: [
+                    { 
+                        id: 1, 
+                        chapter: 'Chapter 1: Autonomic & System Physiology',
+                        domain: 'Basic Sciences', 
+                        topic: 'Cardiovascular Physiology', 
+                        references: "Miller 10e Ch 18, M&M Ch 19",
+                        sections: {
+                            physiology: [
+                                "LV Pressure-Volume (PV) loop boundaries, stroke work, and preload/afterload transitions",
+                                "Arterial baroreceptors, vasopressor reflexes, and peripheral vascular tone controls",
+                                "Myocardial oxygen demand/supply matching parameters & coronary autoregulatory limits",
+                                "Vascular function curves & relationship between venous return and MSFP (Mean Systemic Filling Pressure)"
+                            ],
+                            pharmacology: [
+                                "PDE-III inhibitors (milrinone), cardiac glycosides, and calcium sensitizers (levosimendan) actions",
+                                "Inotropic versus chronotropic dynamics of adrenergic vasoactive receptor lines"
+                            ],
+                            measurement: [
+                                "Optimal arterial line resonance ranges, damping coefficient targets, and transducer position adjustments",
+                                "Direct Cardiac Output calculations via the Stewart-Hamilton thermodilution equation parameters"
+                            ],
+                            clinical: [
+                                "Anesthetic adjustments in severe aortic stenosis: preserving coronary pressure perfusion via SVR maintenance",
+                                "Physiological protection protocols during Cardiopulmonary Bypass aortic cross-clamping"
+                            ]
+                        },
+                        subtopics: [
+                            'LV Pressure-Volume loops and contractility boundaries',
+                            'Vasomotor baroreflex feedback systems',
+                            'Coronary oxygen autoregulatory margins',
+                            'Thermodilution Stewart-Hamilton equations'
+                        ],
+                        tags: ['cardiac', 'cvs', 'physiology', 'loops'], 
+                        status: 'To Do', 
+                        scheduledDate: null, 
+                        notes: '' 
+                    },
+                    { 
+                        id: 2, 
+                        chapter: 'Chapter 1: Autonomic & System Physiology',
+                        domain: 'Basic Sciences', 
+                        topic: 'Respiratory Mechanics & V/Q', 
+                        references: "Miller 10e Ch 19, M&M Ch 20",
+                        sections: {
+                            physiology: [
+                                "Lung and chest wall compliance curves, elastic recoil values, and surfactant role",
+                                "Bohr equation parameters for anatomical and alveolar physiological dead space calculations",
+                                "Gravity-driven vertical ventilation-perfusion matching zones: West Zones 1, 2, and 3",
+                                "Proton, carbon dioxide, and temperature shifting properties of oxygen-hemoglobin curves (Bohr vs Haldane)"
+                            ],
+                            pharmacology: [
+                                "Volatile anesthetic dose-dependent attenuation of Hypoxic Pulmonary Vasoconstriction (HPV)"
+                            ],
+                            measurement: [
+                                "Infrared capnography waveform phase segments (Phase I to IV transitions)",
+                                "Beer-Lambert law absorption spectrophotometry in pulse oximeters"
+                            ],
+                            clinical: [
+                                "FRC washing parameters, oxygen reserves, and desaturation curves during apnea",
+                                "Protective ventilation in severe ARDS: plateau pressures <30 cmH2O and low tidal volume targets"
+                            ]
+                        },
+                        subtopics: [
+                            'Lung compliance, surfactant parameters, and chest wall recoil',
+                            'Bohr dead space equation and anatomical space variables',
+                            'West zones of the lung and V/Q distribution patterns',
+                            'Bohr vs Haldane effects on hemoglobin shifting'
+                        ],
+                        tags: ['respiratory', 'lung', 'oxygen', 'co2'], 
+                        status: 'To Do', 
+                        scheduledDate: null, 
+                        notes: '' 
+                    },
+                    { 
+                        id: 3, 
+                        chapter: 'Chapter 1: Autonomic & System Physiology',
+                        domain: 'Basic Sciences', 
+                        topic: 'Acid-Base & Physical-Chemical Model', 
+                        references: "Miller 10e Ch 45, M&M Ch 40",
+                        sections: {
+                            physiology: [
+                                "Henderson-Hasselbalch equation limitations in evaluating unmeasured anions",
+                                "Stewart Physical-Chemical model parameters: SID (Strong Ion Difference), Atot, and PCO2",
+                                "Strong Ion Gap (SIG) as a calculator of unmeasured strong weak volatile acids",
+                                "Tubular proton excretion systems and sodium-bicarbonate symporter limits"
+                            ],
+                            pharmacology: [
+                                "Acidosis-driven alterations in local anesthetic ionized fraction parameters"
+                            ],
+                            measurement: [
+                                "Anion gap variables: Albumin corrections in metabolic evaluations"
+                            ],
+                            clinical: [
+                                "Saline-induced (0.9% NaCl) hyperchloremic metabolic acidosis pathogenesis",
+                                "SID narrowing during massive whole blood or packed red cell transfusions"
+                            ]
+                        },
+                        subtopics: [
+                            'Stewart Strong Ion Difference equations',
+                            'Strong Ion Gap vs standard Anion Gap calculations',
+                            'Henderson-Hasselbalch equations and systemic limits',
+                            'Chloride-driven metabolic shifts'
+                        ],
+                        tags: ['acid-base', 'stewart', 'chemistry', 'renal'], 
+                        status: 'To Do', 
+                        scheduledDate: null, 
+                        notes: '' 
+                    },
+                    { 
+                        id: 4, 
+                        chapter: 'Chapter 1: Autonomic & System Physiology',
+                        domain: 'Basic Sciences', 
+                        topic: 'Renal Physiology', 
+                        references: "Miller 10e Ch 21, M&M Ch 30",
+                        sections: {
+                            physiology: [
+                                "Glomerular Filtration Rate (GFR) autoregulatory mechanisms & arterial perfusion thresholds",
+                                "Countercurrent multiplier system & loops of Henle concentration gradients",
+                                "Tubular sodium, potassium, and water handling across nephron segments",
+                                "Renin-Angiotensin-Aldosterone System (RAAS) response triggers & hormone kinetics"
+                            ],
+                            pharmacology: [
+                                "Diuretic mechanics: carbonic anhydrase inhibitors, loop diuretics, thiazides, aldosterone antagonists"
+                            ],
+                            clinical: [
+                                "Etiology of acute kidney injury (AKI) & KDIGO staging criteria in perioperative phases"
+                            ]
+                        },
+                        subtopics: [
+                            'GFR autoregulation ranges and blood pressure controls',
+                            'Countercurrent multiplier physiology and medullary hypertonicity',
+                            'RAAS endocrine loops and circulatory compensations',
+                            'Diuretic transport blockade segments'
+                        ],
+                        tags: ['renal', 'kidney', 'physiology', 'gfr'], 
+                        status: 'To Do', 
+                        scheduledDate: null, 
+                        notes: '' 
+                    },
+                    { 
+                        id: 5, 
+                        chapter: 'Chapter 1: Autonomic & System Physiology',
+                        domain: 'Basic Sciences', 
+                        topic: 'Neurophysiology', 
+                        references: "Miller 10e Ch 20, M&M Ch 27",
+                        sections: {
+                            physiology: [
+                                "Cerebral blood flow (CBF) autoregulation curves & carbon dioxide responsiveness",
+                                "Monro-Kellie doctrine & Intracranial Pressure (ICP) compliance curves",
+                                "Cerebrospinal fluid (CSF) production, circulation paths, and absorption rates",
+                                "Blood-brain barrier transport mechanics and CMRO2 coupling parameters"
+                            ],
+                            pharmacology: [
+                                "Anesthetic impacts on CBF, ICP, and cerebral metabolic rate of oxygen (CMRO2)"
+                            ]
+                        },
+                        subtopics: [
+                            'Cerebral blood flow autoregulatory limits and blood pressure',
+                            'Monro-Kellie doctrine and intracranial compliance curves',
+                            'CSF production, circulatory pathways, and resorption',
+                            'Blood-brain barrier transport dynamics and CMRO2'
+                        ],
+                        tags: ['neuro', 'brain', 'icp', 'csf'], 
+                        status: 'To Do', 
+                        scheduledDate: null, 
+                        notes: '' 
+                    },
+                    { 
+                        id: 6, 
+                        chapter: 'Chapter 1: Autonomic & System Physiology',
+                        domain: 'Basic Sciences', 
+                        topic: 'Hepatic & Metabolic Physiology', 
+                        references: "Miller 10e Ch 22, M&M Ch 32",
+                        sections: {
+                            physiology: [
+                                "Phase I (oxidation/reduction) vs Phase II (conjugation) drug metabolism loops",
+                                "Hepatic arterial buffer response (HABR) and portal blood flow maintenance",
+                                "Endocrine surgical stress responses: catecholamines, cortisol, cortisol resistance",
+                                "Adrenal crisis pathophysiology, diagnostic tests, and steroid coverage targets"
+                            ]
+                        },
+                        subtopics: [
+                            'Phase I vs Phase II hepatic clearance mechanisms',
+                            'Hepatic arterial buffer response (HABR) physiology',
+                            'Stress response endocrine hormone cascades',
+                            'Adrenal insufficiency diagnostic algorithms'
+                        ],
+                        tags: ['hepatic', 'liver', 'metabolic', 'endocrine'], 
+                        status: 'To Do', 
+                        scheduledDate: null, 
+                        notes: '' 
+                    },
+                    { 
+                        id: 7, 
+                        chapter: 'Chapter 1: Autonomic & System Physiology',
+                        domain: 'Basic Sciences', 
+                        topic: 'Autonomic Nervous System', 
+                        references: "Miller 10e Ch 14, M&M Ch 13",
+                        sections: {
+                            physiology: [
+                                "Sympathetic and parasympathetic outflow systems: ganglionic fiber anatomical paths",
+                                "Adrenoceptor classifications (alpha 1, 2, beta 1, 2, 3) & second messenger pathways",
+                                "Cholinergic autonomic receptor systems: Muscarinic vs Nicotinic profiles",
+                                "Baroreceptor feedback loops & systemic baroreflex sensitivity parameters"
+                            ]
+                        },
+                        subtopics: [
+                            'Sympathetic Outflow pathways & ganglionic anatomy',
+                            'Adrenoceptor subclasses and second messengers',
+                            'Muscarinic and Nicotinic receptor functions',
+                            'Baroreflex cardiovascular loops'
+                        ],
+                        tags: ['ans', 'sympathetic', 'baroreceptor', 'receptors'], 
+                        status: 'To Do', 
+                        scheduledDate: null, 
+                        notes: '' 
+                    },
+                    { 
+                        id: 8, 
+                        chapter: 'Chapter 2: Essential Pharmacology',
+                        domain: 'Basic Sciences', 
+                        topic: 'Intravenous Pharmacokinetics', 
+                        references: "Miller 10e Ch 24, M&M Ch 7",
+                        sections: {
+                            physiology: [
+                                "Apparent volume of distribution (Vd): central vs peripheral compartment ratios",
+                                "Clearance mechanics: hepatic perfusion dependency versus tissue esterase clearance"
+                            ],
+                            pharmacology: [
+                                "Context-Sensitive Half-Time (CSHT) mathematical decay curves of continuous infusions",
+                                "Fentanyl, alfentanil, and remifentanil effect-site equilibration rates (t1/2ke0)",
+                                "Target-Controlled Infusion (TCI) models: parameters of Marsh vs Schnider equations",
+                                "Adrenocortical cortisol suppression by etomidate via 11-beta-hydroxylase block"
+                            ],
+                            measurement: [
+                                "Depth of anesthesia indicators: processed EEG metrics (BIS / spectral edge)"
+                            ],
+                            clinical: [
+                                "Target Controlled Infusions (TCI) models: Marsh vs Schnider parameters",
+                                "Vasodilatory collapse on propofol induction in hemodynamically unstable septic cases"
+                            ]
+                        },
+                        subtopics: [
+                            'Vd, compartment kinetics, and drug distribution boundaries',
+                            'Context-Sensitive Half-Time (CSHT) curves and half-life',
+                            'Remifentanil esterase clearance vs propofol hepatic extraction',
+                            'Adrenocortical suppression by Etomidate'
+                        ],
+                        tags: ['iv', 'pharmacology', 'propofol', 'ketamine'], 
+                        status: 'To Do', 
+                        scheduledDate: null, 
+                        notes: '' 
+                    },
+                    { 
+                        id: 9, 
+                        chapter: 'Chapter 2: Essential Pharmacology',
+                        domain: 'Basic Sciences', 
+                        topic: 'Inhalational Pharmacodynamics', 
+                        references: "Miller 10e Ch 25, M&M Ch 8",
+                        sections: {
+                            physiology: [
+                                "Gas transport mechanics: alveolar-arterial concentration gradient parameters",
+                                "Effect of cardiac output on rate of rise of alveolar gas concentration (FA/Fi)"
+                            ],
+                            pharmacology: [
+                                "MAC definitions, MAC-awake, MAC-BAR, and factors altering MAC parameters",
+                                "Anesthetic solubility indices: Blood/Gas, Oil/Gas, and Tissue/Blood ratios",
+                                "Concentration effect, second gas effect, and clinical diffusion hypoxia kinetics",
+                                "Compound A production parameters and Sevoflurane fluoride metabolite toxicity limits"
+                            ]
+                        },
+                        subtopics: [
+                            'MAC standards, definitions, and physiological shifts',
+                            'Solubility coefficients: Blood/Gas vs Oil/Gas parameters',
+                            'Concentration effect & Second Gas kinetics',
+                            'Sevoflurane degradation and Compound A properties'
+                        ],
+                        tags: ['gas', 'inhalational', 'sevoflurane', 'desflurane'], 
+                        status: 'To Do', 
+                        scheduledDate: null, 
+                        notes: '' 
+                    },
+                    { 
+                        id: 10, 
+                        chapter: 'Chapter 2: Essential Pharmacology',
+                        domain: 'Basic Sciences', 
+                        topic: 'Neuromuscular Junction & Blockade', 
+                        references: "Miller 10e Ch 31, M&M Ch 12",
+                        sections: {
+                            physiology: [
+                                "Neuromuscular junction anatomy, nicotinic receptor structures, and acetylcholine pathways"
+                            ],
+                            pharmacology: [
+                                "Depolarizing blockades (Suxamethonium) vs nondepolarizers (Rocuronium, Atracurium, Cisatracurium)",
+                                "Hoffmann elimination mechanics: temperature and pH-dependent spontaneous degradation",
+                                "Sugammadex host-guest inclusion complex chemistry vs Neostigmine anticholinesterase dynamics",
+                                "Phase II blockade mechanics under continuous depolarizing block conditions"
+                            ],
+                            measurement: [
+                                "Train-of-Four (TOF) monitoring: post-tetanic facilitation and double burst profiles"
+                            ]
+                        },
+                        subtopics: [
+                            'Nicotinic acetylcholine receptor structural profiles',
+                            'Depolarizing Suxamethonium vs nondepolarizing block actions',
+                            'Hoffmann spontaneous clearance of Cisatracurium',
+                            'Sugammadex 1:1 chemical encapsulation models'
+                        ],
+                        tags: ['nmba', 'rocuronium', 'sugammadex', 'receptor'], 
+                        status: 'To Do', 
+                        scheduledDate: null, 
+                        notes: '' 
+                    },
+                    { 
+                        id: 11, 
+                        chapter: 'Chapter 2: Essential Pharmacology',
+                        domain: 'Basic Sciences', 
+                        topic: 'Local Anesthetic Pharmacology', 
+                        references: "Miller 10e Ch 29, M&M Ch 11",
+                        sections: {
+                            physiology: [
+                                "Nerve fiber anatomy: sensitivity classifications (A-alpha, beta, gamma, delta, B, C fibers)"
+                            ],
+                            pharmacology: [
+                                "Voltage-gated sodium channel state blockades (hydrophobic vs hydrophilic pathways)",
+                                "Stereoisomeric differences: bupivacaine, levobupivacaine, ropivacaine cardiotoxicity risks",
+                                "LAST (Local Anesthetic Systemic Toxicity) guidelines & 20% lipid emulsion rescue protocols",
+                                "Additives (adrenaline, sodium bicarbonate, dexamethasone) mechanisms & duration shifts"
+                            ]
+                        },
+                        subtopics: [
+                            'Myelinated vs unmyelinated nerve fiber blockade blocks',
+                            'Sodium channel state-dependent block mechanisms',
+                            'Ropivacaine vs Bupivacaine structural toxic profiles',
+                            'LAST emergency guidelines and Lipid Rescue'
+                        ],
+                        tags: ['regional', 'local', 'toxicity', 'lipid'], 
+                        status: 'To Do', 
+                        scheduledDate: null, 
+                        notes: '' 
+                    },
+                    { 
+                        id: 12, 
+                        chapter: 'Chapter 3: Physics & Anesthesia Equipment',
+                        domain: 'Basic Sciences', 
+                        topic: 'Physics of Equipment & Vaporizers', 
+                        references: "Dorsch & Dorsch Ch 5, M&M Ch 15",
+                        sections: {
+                            physiology: [
+                                "Thermal conductivity properties of carrier gases: helium, nitrous oxide, oxygen"
+                            ],
+                            equipment: [
+                                "Gas cylinder Pin Index Safety Systems (PISS) and gas filling ratios",
+                                "Variable-bypass vaporizers: mechanical bimetallic strip temperature and pressure compensation",
+                                "Pressurized heated vaporizers (Tec 6) for Desflurane blending chemistry",
+                                "Mapleson breathing system classifications (A through F) & fresh gas flow equations"
+                            ],
+                            measurement: [
+                                "Oxygen failure warning systems and proportioning devices preventing hypoxic mixtures"
+                            ],
+                            clinical: [
+                                "Vaporizer tipping risk parameters of vaporizers and delivery of hyper-concentrated agents",
+                                "Pipeline gas cross-connection hazards and safe cylinder backup practices"
+                            ]
+                        },
+                        subtopics: [
+                            'Gas cylinder pressures, filling ratios, and safety keys',
+                            'Variable-bypass vaporizers: mechanical temperature loops',
+                            'Tec 6 Desflurane pressurized vaporizer heat blending mechanisms',
+                            'Mapleson circuit gas flow requirement classifications'
+                        ],
+                        tags: ['physics', 'equipment', 'monitors', 'vaporizer'], 
+                        status: 'To Do', 
+                        scheduledDate: null, 
+                        notes: '' 
+                    },
+                    { 
+                        id: 13, 
+                        chapter: 'Chapter 3: Physics & Anesthesia Equipment',
+                        domain: 'Basic Sciences', 
+                        topic: 'Fluid and Flow Dynamics', 
+                        references: "Dorsch & Dorsch Ch 5, M&M Ch 15",
+                        sections: {
+                            physiology: [
+                                "Hagen-Poiseuille law parameters for laminar flow through clinical tubes & IV cannulas",
+                                "Reynolds number transition criteria: laminar vs turbulent flow properties"
+                            ],
+                            equipment: [
+                                "Bernoulli principle, Venturi effect, and gas entrainment system physics",
+                                "Coanda effect in gas flow routing & medical ventilator exhalation valves",
+                                "Rotameter calibrations: flow rate influence on gas density vs viscosity variables",
+                                "Aerosol delivery physics: ultrasonic nebulizer particle sizing boundaries"
+                            ]
+                        },
+                        subtopics: [
+                            'Hagen-Poiseuille equation parameters & fluid flow resistance',
+                            'Reynolds number thresholds for turbulent transition flows',
+                            'Bernoulli and Venturi entrainment physics',
+                            'Rotameter calibrations: viscosity vs density limits'
+                        ],
+                        tags: ['physics', 'flow', 'venturi', 'liquids'], 
+                        status: 'To Do', 
+                        scheduledDate: null, 
+                        notes: '' 
+                    },
+                    { 
+                        id: 14, 
+                        chapter: 'Chapter 3: Physics & Anesthesia Equipment',
+                        domain: 'Basic Sciences', 
+                        topic: 'Clinical Measurement & Calibration', 
+                        references: "Miller 10e Ch 33, M&M Ch 16",
+                        sections: {
+                            physiology: [
+                                "Oxyhemoglobin spectrophotometry properties: infrared vs red light absorption"
+                            ],
+                            equipment: [
+                                "Capnography wave physics: infrared absorption (Lambert-Beer) and chamber calibrations",
+                                "Invasive pressure transducer resonance, natural frequency, and optimal damping factors",
+                                "Processed EEG algorithms (Bispectral Index / BIS, Spectral Edge Frequency)",
+                                "Thermodilution Cardiac Output curves and the Stewart-Hamilton equation variables"
+                            ]
+                        },
+                        subtopics: [
+                            'Spectrophotometric red/infrared oxygen ratios',
+                            'Capnographic wave phase segments & IR absorption',
+                            'Resonance and damping limits of invasive arterial lines',
+                            'Processed EEG depth indicators & BIS parameters'
+                        ],
+                        tags: ['monitors', 'invasive', 'co', 'capnogram'], 
+                        status: 'To Do', 
+                        scheduledDate: null, 
+                        notes: '' 
+                    },
+                    { 
+                        id: 15, 
+                        chapter: 'Chapter 4: Clinical Subspecialty Anesthesia',
+                        domain: 'Clinical Anesthesia', 
+                        topic: 'Airway Management & Difficult Airway', 
+                        references: "Miller 10e Ch 44, M&M Ch 19",
+                        sections: {
+                            physiology: [
+                                "Airway anatomy, laryngeal nerve outflow, and risk indicators for rapid desaturation"
+                            ],
+                            clinical: [
+                                "DAS (Difficult Airway Society) guidelines for unanticipated difficult intubation",
+                                "Front-of-Neck Access (FONA) algorithms: scalpel-bougie-tube rescue parameters",
+                                "Surgical extubation criteria: safe assessment of airway patency",
+                                "Supraglottic airway device classifications: first vs second-generation criteria"
+                            ]
+                        },
+                        subtopics: [
+                            'Airway anatomy and sensory nerve outflow',
+                            'DAS unanticipated difficult intubation protocols',
+                            'FONA emergency procedures and tools',
+                            'SGA generation guidelines and sizes'
+                        ],
+                        tags: ['airway', 'das', 'fona', 'intubation'], 
+                        status: 'To Do', 
+                        scheduledDate: null, 
+                        notes: '' 
+                    },
+                    { 
+                        id: 16, 
+                        chapter: 'Chapter 4: Clinical Subspecialty Anesthesia',
+                        domain: 'Clinical Anesthesia', 
+                        topic: 'Obstetric Anaesthesia', 
+                        references: "Miller 10e Ch 58, M&M Ch 41",
+                        sections: {
+                            physiology: [
+                                "Left uterine displacement parameters in resolving maternal aortocaval compression",
+                                "FRC drops and minute ventilation increases in late gestational physiology"
+                            ],
+                            pharmacology: [
+                                "Uterotonics: hemodynamics and receptor targets of oxytocin, ergometrine, and carboprost",
+                                "Decreased threshold for cardiotoxic local anesthetic effects in pregnancy"
+                            ],
+                            clinical: [
+                                "Magnesium sulfate infusions, monitoring parameters, and calcium gluconate rescue",
+                                "Obstetric airway rescue sequence: Difficult Airway Society failed intubation guidelines",
+                                "Amniotic fluid embolism (AFE): clinical identification and intensive resuscitation"
+                            ]
+                        },
+                        subtopics: [
+                            'Aortocaval compression and left uterine displacement',
+                            'Labor epidural local anesthetic cardiotoxicity risk factors',
+                            'Magnesium sulfate dosing, monitoring, and calcium rescue',
+                            'Failed obstetric intubation algorithms and airway rescue'
+                        ],
+                        tags: ['obstetrics', 'pregnancy', 'failed airway', 'magnesium'], 
+                        status: 'To Do', 
+                        scheduledDate: null, 
+                        notes: '' 
+                    },
+                    { 
+                        id: 17, 
+                        chapter: 'Chapter 4: Clinical Subspecialty Anesthesia',
+                        domain: 'Clinical Anesthesia', 
+                        topic: 'Paediatric Anesthesia', 
+                        references: "Miller 10e Ch 59, M&M Ch 42",
+                        sections: {
+                            physiology: [
+                                "Fetal-neonatal circulatory transition: ductus arteriosus and foramen ovale closure parameters",
+                                "Neonatal respiratory mechanics: high chest wall compliance, low alveolar compliance"
+                            ],
+                            pharmacology: [
+                                "Pediatric anesthetic pharmacology: altered Vd, MAC values by age, and drug margins"
+                            ],
+                            clinical: [
+                                "Laryngospasm emergency algorithms: jaw thrust, positive pressure, suxamethonium doses",
+                                "Congenital surgical repair parameters: congenital diaphragmatic hernia (CDH), pyloric stenosis",
+                                "Fluid therapy equations: maintenance fluid calculations, glucose parameters"
+                            ]
+                        },
+                        subtopics: [
+                            'Fetal-neonatal circulatory transition parameters',
+                            'High compliance chest walls vs neonatal lungs',
+                            'Laryngospasm emergency protocols',
+                            'Congenital CDH and pyloric stenosis repairs'
+                        ],
+                        tags: ['pediatric', 'neonate', 'croup', 'pyloric'], 
+                        status: 'To Do', 
+                        scheduledDate: null, 
+                        notes: '' 
+                    },
+                    { 
+                        id: 18, 
+                        chapter: 'Chapter 4: Clinical Subspecialty Anesthesia',
+                        domain: 'Clinical Anesthesia', 
+                        topic: 'Cardiac & Thoracic Anesthesia', 
+                        references: "Miller 10e Ch 55, M&M Ch 34",
+                        sections: {
+                            physiology: [
+                                "Cardiac valve hemodynamics: aortic stenosis vs mitral regurgitation filling targets",
+                                "Hypoxic pulmonary vasoconstriction (HPV) parameters during one-lung ventilation"
+                            ],
+                            pharmacology: [
+                                "Inotropic support lines, vasodilators, and systemic anticoagulation for CPB (heparin)"
+                            ],
+                            clinical: [
+                                "Cardiopulmonary Bypass (CPB) circuit mechanics & prime solution parameters",
+                                "One-lung ventilation: double-lumen tube (DLT) placement vs bronchial blockers",
+                                "Tamponade, dissection, and anterior mediastinal mass emergency protocols",
+                                "TEE (Transesophageal Echocardiography) basic imaging views & loops"
+                            ]
+                        },
+                        subtopics: [
+                            'Valvular heart disease Filling limits & guidelines',
+                            'Hypoxic pulmonary vasoconstriction (HPV) OLV boundaries',
+                            'Double-lumen tube (DLT) placement & blockers',
+                            'Cardiopulmonary Bypass heparinization & reversals'
+                        ],
+                        tags: ['cardiac', 'bypass', 'thoracic', 'valve'], 
+                        status: 'To Do', 
+                        scheduledDate: null, 
+                        notes: '' 
+                    },
+                    { 
+                        id: 19, 
+                        chapter: 'Chapter 4: Clinical Subspecialty Anesthesia',
+                        domain: 'Clinical Anesthesia', 
+                        topic: 'Neuroanaesthesia', 
+                        references: "Miller 10e Ch 56, M&M Ch 39",
+                        sections: {
+                            physiology: [
+                                "ICP compliance waveforms: P1, P2, P3 peaks in brain space-occupying states",
+                                "Venous outflow pathways, jugular bulb saturation limits & positioning effects"
+                            ],
+                            clinical: [
+                                "Craniotomy maneuvers: hyperventilation targets, mannitol dosing, and loop diuretics",
+                                "Venous Air Embolism (VAE): sitting position hazards, Doppler detection, aspiration",
+                                "Spinal cord injury (SCI): spinal shock vs autonomic dysreflexia parameters",
+                                "Subarachnoid hemorrhage (SAH) parameters: triple-H therapy vs nimodipine targets"
+                            ]
+                        },
+                        subtopics: [
+                            'ICP compliance peak waveforms',
+                            'Autoregulation margins and hyperventilation targets',
+                            'Venous Air Embolism Doppler sound limits',
+                            'Autonomic dysreflexia spinal triggers'
+                        ],
+                        tags: ['neuro', 'craniotomy', 'brain', 'spinal cord'], 
+                        status: 'To Do', 
+                        scheduledDate: null, 
+                        notes: '' 
+                    },
+                    { 
+                        id: 20, 
+                        chapter: 'Chapter 4: Clinical Subspecialty Anesthesia',
+                        domain: 'Clinical Anesthesia', 
+                        topic: 'Geriatric & Frailty Anesthesia', 
+                        references: "Miller 10e Ch 60, M&M Ch 43",
+                        sections: {
+                            physiology: [
+                                "Cardiovascular stiffness, vascular compliance drops, and heart rate autonomic decline",
+                                "Altered respiratory compliance: increased closing volume and dead space values"
+                            ],
+                            pharmacology: [
+                                "MAC changes with age & drug pharmacokinetics changes in lipophilic agents"
+                            ],
+                            clinical: [
+                                "Postoperative Cognitive Dysfunction (POCD) & delirium risk triggers",
+                                "Frailty index models, clinical assessments, and premedication risks"
+                            ]
+                        },
+                        subtopics: [
+                            'Age-related cardiovascular compliance drop parameters',
+                            'Geriatric MAC value reductions & clearance drops',
+                            'POCD & post-anesthetic delirium risk parameters',
+                            'Frailty Index scale parameters'
+                        ],
+                        tags: ['geriatric', 'frailty', 'mac', 'delirium'], 
+                        status: 'To Do', 
+                        scheduledDate: null, 
+                        notes: '' 
+                    },
+                    { 
+                        id: 21, 
+                        chapter: 'Chapter 4: Clinical Subspecialty Anesthesia',
+                        domain: 'Clinical Anesthesia', 
+                        topic: 'Bariatric & Obesity Anesthesia', 
+                        references: "Miller 10e Ch 61, M&M Ch 36",
+                        sections: {
+                            physiology: [
+                                "Pulmonary compliance drop, FRC restriction, and fast oxygen desaturation limits",
+                                "Obstructive Sleep Apnea (OSA) pathophysiological cardiovascular changes"
+                            ],
+                            pharmacology: [
+                                "Obesity dosing guidelines: Ideal (IBW), Lean (LBW), and Total (TBW) body weight"
+                            ],
+                            clinical: [
+                                "STOP-BANG scoring parameters for preoperative risk stratifications",
+                                "Preoxygenation optimizations: ramped head-up positioning & pressure support",
+                                "Postoperative airway support: early non-invasive ventilation (BiPAP/CPAP)"
+                            ]
+                        },
+                        subtopics: [
+                            'Obese pulmonary FRC restriction parameters',
+                            'Obesity dosing metrics: IBW, LBW vs TBW lines',
+                            'STOP-BANG score parameters',
+                            'Ramped preoxygenation head-up positioning'
+                        ],
+                        tags: ['obesity', 'bariatric', 'osa', 'dosing'], 
+                        status: 'To Do', 
+                        scheduledDate: null, 
+                        notes: '' 
+                    },
+                    { 
+                        id: 22, 
+                        chapter: 'Chapter 5: Regional Anesthesia & Block Anatomy',
+                        domain: 'Clinical Anesthesia', 
+                        topic: 'Regional Blocks & Anatomy', 
+                        references: "Miller 10e Ch 51, M&M Ch 45",
+                        sections: {
+                            physiology: [
+                                "Dermatomal distributions of spinal nerve roots (C6, T4, T10, L4, S1)"
+                            ],
+                            clinical: [
+                                "Upper limb blocks: interscalene, supraclavicular, infraclavicular cord landmarks",
+                                "Lower limb blocks: femoral nerve, sciatic, popliteal fossa ultrasound targets",
+                                "Trunk blocks: TAP block fascial planes & fascia iliaca compartment block (FICB)",
+                                "Neuraxial block parameters: spinal ligaments, CSF detection, and dural puncture"
+                            ]
+                        },
+                        subtopics: [
+                            'Spinal root dermatomal maps & zones',
+                            'Upper limb supraclavicular block boundaries',
+                            'Femoral and Popliteal fossa block landmarks',
+                            'Spinal ligament planes & dural puncture limits'
+                        ],
+                        tags: ['regional', 'nerve block', 'anatomy', 'ultrasound'], 
+                        status: 'To Do', 
+                        scheduledDate: null, 
+                        notes: '' 
+                    },
+                    { 
+                        id: 23, 
+                        chapter: 'Chapter 6: Trauma, Coagulation & Intensive Care',
+                        domain: 'Intensive Care', 
+                        topic: 'Sepsis & Septic Shock', 
+                        references: "Miller 10e Ch 71, M&M Ch 47",
+                        sections: {
+                            physiology: [
+                                "Hyperdynamic circulatory stages: extreme vasodilation, capillary leaks, tissue hypoperfusion",
+                                "Pathophysiological microvascular dysfunction & cellular oxygen extraction barriers"
+                            ],
+                            pharmacology: [
+                                "Inotropic and vasopressor receptor targets: Norepinephrine, Adrenaline, Vasopressin"
+                            ],
+                            clinical: [
+                                "Surviving Sepsis Campaign clinical bundles: fluid and lactate targets",
+                                "Tissue hypoperfusion parameters: venous oxygen saturations (ScvO2) and lactate clearance",
+                                "Corticosteroid administration parameters in refractory vasoplegic shock",
+                                "Hemodynamic monitoring targets: pulse pressure variation (PPV) and stroke volume variation (SVV)"
+                            ]
+                        },
+                        subtopics: [
+                            'Hyperdynamic septic shock microvascular shifts',
+                            'Vasopressor receptor selections: alpha vs beta vs V1',
+                            'Surviving Sepsis Campaign bundle parameters',
+                            'Fluid responsiveness metrics: PPV vs SVV bounds'
+                        ],
+                        tags: ['sepsis', 'shock', 'inotropes', 'icu'], 
+                        status: 'To Do', 
+                        scheduledDate: null, 
+                        notes: '' 
+                    },
+                    { 
+                        id: 24, 
+                        chapter: 'Chapter 6: Trauma, Coagulation & Intensive Care',
+                        domain: 'Intensive Care', 
+                        topic: 'ARDS Ventilation', 
+                        references: "Miller 10e Ch 73, M&M Ch 48",
+                        sections: {
+                            physiology: [
+                                "Alveolar shearing, progressive surfactant damage, and cellular ARDS exudative phases",
+                                "Hypoxic pulmonary vasoconstriction (HPV) inhibition in septic shock"
+                            ],
+                            pharmacology: [
+                                "Inhaled nitric oxide (iNO) and prostacyclin pulmonary vasodilation actions"
+                            ],
+                            clinical: [
+                                "Berlin definition classifications of ARDS: mild, moderate, and severe criteria",
+                                "Low tidal volume (6 mL/kg PBW) limits, and plateau pressure guidelines (<30 cmH2O)",
+                                "Recruitment of dependent posterior regions via standard prone positioning",
+                                "Veno-venous Extracorporeal Membrane Oxygenation (VV-ECMO) access pathways & sweep gas"
+                            ]
+                        },
+                        subtopics: [
+                            'Berlin ARDS criteria: mild, moderate, and severe states',
+                            'Lung-protective parameters: tidal volume, driving pressure, plateau limit',
+                            'Prone ventilation respiratory recruitments',
+                            'VV-ECMO access design, flow limits, and sweep gas'
+                        ],
+                        tags: ['ards', 'ventilation', 'lung', 'ecmo'], 
+                        status: 'To Do', 
+                        scheduledDate: null, 
+                        notes: '' 
+                    },
+                    { 
+                        id: 25, 
+                        chapter: 'Chapter 6: Trauma, Coagulation & Intensive Care',
+                        domain: 'Intensive Care', 
+                        topic: 'Renal Replacement Therapy', 
+                        references: "Miller 10e Ch 74, M&M Ch 49",
+                        sections: {
+                            physiology: [
+                                "Uremic platelet dysfunction, metabolic acidosis, and hyperkalemic electrical instability"
+                            ],
+                            clinical: [
+                                "Continuous Renal Replacement Therapy (CRRT) modalities: CVVH vs CVVHD vs CVVHDF",
+                                "Anticoagulation parameters: regional citrate anticoagulation (RCA) vs systemic heparin",
+                                "Dialysis triggers: refractory metabolic acidosis, severe hyperkalemia, fluid overload",
+                                "Filter clearance principles: convective solute drag vs diffusive gradient transfer"
+                            ]
+                        },
+                        subtopics: [
+                            'Uremic platelet dysfunction and ion cardiotoxicity',
+                            'CRRT modalities: CVVH vs CVVHD vs CVVHDF',
+                            'Regional Citrate Anticoagulation (RCA) parameters',
+                            'Diffusion vs Convection clearance principles'
+                        ],
+                        tags: ['crrt', 'renal', 'dialysis', 'kidney'], 
+                        status: 'To Do', 
+                        scheduledDate: null, 
+                        notes: '' 
+                    },
+                    { 
+                        id: 26, 
+                        chapter: 'Chapter 6: Trauma, Coagulation & Intensive Care',
+                        domain: 'Intensive Care', 
+                        topic: 'Critical Care Toxicology', 
+                        references: "Miller 10e Ch 78, M&M Ch 51",
+                        sections: {
+                            physiology: [
+                                "Anion gap toxic metabolic shifts & mitochondrial respiratory chain disruption"
+                            ],
+                            pharmacology: [
+                                "Acetaminophen toxicity pathways: NAPQI formation and N-acetylcysteine (NAC) protocols",
+                                "Salicylate poisoning: clinical presentation, anion gap, and urinary alkalinization",
+                                "Organophosphate poisoning: cholinergic crisis, atropine, and pralidoxime protocols",
+                                "Carbon monoxide poisoning: carboxyhemoglobin limits and hyperbaric oxygen indications"
+                            ]
+                        },
+                        subtopics: [
+                            'Anion gap metabolic toxic shifts',
+                            'Paracetamol NAPQI toxicity & NAC protocol ranges',
+                            'Salicylate acidosis & urinary alkalinization',
+                            'Organophosphate cholinergic atropine protocols'
+                        ],
+                        tags: ['toxicology', 'poison', 'antidote', 'salicylate'], 
+                        status: 'To Do', 
+                        scheduledDate: null, 
+                        notes: '' 
+                    },
+                    { 
+                        id: 27, 
+                        chapter: 'Chapter 6: Trauma, Coagulation & Intensive Care',
+                        domain: 'Intensive Care', 
+                        topic: 'Haematology & Coagulation Assays', 
+                        references: "Miller 10e Ch 65, M&M Ch 35",
+                        sections: {
+                            physiology: [
+                                "ROTEM/TEG waveforms: EXTEM, INTEM, FIBTEM patterns",
+                                "Hyperfibrinolysis markers, clot lysis rates, and platelet checks",
+                                "Massive transfusion protocol (MTP) initiation triggers & blood products",
+                                "Anticoagulant reversal targets: Warfarin, Heparin, DOACs"
+                            ]
+                        },
+                        subtopics: [
+                            'EXTEM, INTEM, and FIBTEM parameter tracks',
+                            'Clot formation times, MCF, and lysis indexes',
+                            'Massive Transfusion Protocol ratios & products',
+                            'Warfarin and DOAC reversal targets'
+                        ],
+                        tags: ['coagulation', 'rotem', 'transfusion', 'blood'], 
+                        status: 'To Do', 
+                        scheduledDate: null, 
+                        notes: '' 
+                    },
+                    { 
+                        id: 28, 
+                        chapter: 'Chapter 6: Trauma, Coagulation & Intensive Care',
+                        domain: 'Pain Medicine', 
+                        topic: 'Neuropathic Pain & CRPS', 
+                        references: "Miller 10e Ch 53, M&M Ch 45",
+                        sections: {
+                            physiology: [
+                                "Differentiating myelinated A-delta (sharp pain) from unmyelinated C (burning pain) fibers",
+                                "Central sensitization: NMDA receptor activation and pain wind-up mechanics"
+                            ],
+                            pharmacology: [
+                                "Gabapentinoids (pregabalin, gabapentin) blockade of voltage-gated calcium channel alpha-2-delta subunits",
+                                "Tricyclic antidepressants (amitriptyline) and SNRIs (duloxetine) reuptake block parameters"
+                            ],
+                            clinical: [
+                                "Budapest diagnostic criteria parameters in Complex Regional Pain Syndrome (CRPS)",
+                                "Brachial plexus interscalene block: target cord structures and phrenic nerve block risks",
+                                "Fascial plane local anesthetic tracking in TAP and fascia iliaca compartment blocks"
+                            ]
+                        },
+                        subtopics: [
+                            'A-delta vs C pain transmission fibers',
+                            'Central sensitization and NMDA upregulation',
+                            'CRPS Budapest clinical diagnostic criteria',
+                            'Fascia iliaca and TAP block anatomic planes'
+                        ],
+                        tags: ['pain', 'neuropathic', 'regional', 'crps'], 
+                        status: 'To Do', 
+                        scheduledDate: null, 
+                        notes: '' 
+                    },
+                    { 
+                        id: 29, 
+                        chapter: 'Chapter 6: Trauma, Coagulation & Intensive Care',
+                        domain: 'Pain Medicine', 
+                        topic: 'Acute Pain & Nociception', 
+                        references: "Miller 10e Ch 52, M&M Ch 44",
+                        sections: {
+                            physiology: [
+                                "Anatomy of the ascending spinothalamic tract: Rexed laminae in dorsal horn",
+                                "Nociceptor peripheral sensitization: prostaglandin, brain-derived neurotrophic factors"
+                            ],
+                            pharmacology: [
+                                "NSAID mechanism of action: COX-1 and COX-2 blockade",
+                                "Opioid receptor lines (Mu, Kappa, Delta) and second messenger G-protein cascades"
+                            ],
+                            clinical: [
+                                "PCA (Patient-Controlled Analgesia) settings: lockout intervals, background rates",
+                                "Multimodal non-opioid clinical regimens and nerve blockade infusions"
+                            ]
+                        },
+                        subtopics: [
+                            'Ascending spinothalamic tract Rexed laminae',
+                            'Peripheral prostaglandin sensitization pathways',
+                            'Opioid receptor Mu/Kappa/Delta G-protein loops',
+                            'PCA settings, parameters & lockout intervals'
+                        ],
+                        tags: ['pain', 'acute', 'pca', 'analgesia'], 
+                        status: 'To Do', 
+                        scheduledDate: null, 
+                        notes: '' 
+                    },
+                    { 
+                        id: 30, 
+                        chapter: 'Chapter 7: Statistical Methods, Safety & Systems',
+                        domain: 'Basic Sciences', 
+                        topic: 'Statistical Trials & Data', 
+                        references: "Miller 10e Ch 2, M&M Ch 1",
+                        sections: {
+                            physiology: [
+                                "Swiss Cheese accident models: latency errors and active failures in anesthesia systems"
+                            ],
+                            clinical: [
+                                "Type I (alpha) versus Type II (beta) study error rates and power criteria",
+                                "Calculations of Sensitivity, Specificity, Positive Predictive Value (PPV), and NPV",
+                                "Sample size and power analysis equations: alpha limits, beta boundaries, and effect sizes",
+                                "Forest plot evaluations: confidence intervals, odds ratios, and meta-analysis weightings"
+                            ]
+                        },
+                        subtopics: [
+                            'Type I error (alpha) vs Type II error (beta) risks',
+                            'Sensitivity, Specificity, PPV, and NPV calculations',
+                            'Sample size calculations & power',
+                            'Forest and Funnel plots interpretation'
+                        ],
+                        tags: ['statistics', 'trials', 'math', 'safety'], 
+                        status: 'To Do', 
+                        scheduledDate: null, 
+                        notes: '' 
+                    },
+                    { 
+                        id: 31, 
+                        chapter: 'Chapter 7: Statistical Methods, Safety & Systems',
+                        domain: 'Basic Sciences', 
+                        topic: 'Medical Safety Systems', 
+                        references: "Dorsch & Dorsch Ch 20, M&M Ch 2",
+                        sections: {
+                            clinical: [
+                                "Anesthesia machine pressure checks: high, intermediate, and low-pressure leak checks",
+                                "Hypoxic guard mechanics: pneumatic vs mechanical linkages of rotameters",
+                                "Oxygen analyzer calibrations: galvanic fuel cell vs paramagnetic monitoring",
+                                "Scavenging system parameters: open active vs closed passive suction limits"
+                            ]
+                        },
+                        subtopics: [
+                            'Anesthesia machine leak check protocols',
+                            'Pneumatic and mechanical Hypoxic Guard systems',
+                            'Oxygen analyzer paramagnetic calibrations',
+                            'Active vs passive scavenging suction limits'
+                        ],
+                        tags: ['safety', 'equipment', 'monitors', 'scavenging'], 
+                        status: 'To Do', 
+                        scheduledDate: null, 
+                        notes: '' 
+                    }
+                ],
+
+                // Core initialization and persistence
+                initApp() {
+                    const savedSyllabus = localStorage.getItem('ultra_syllabus_data_backup');
+                    if (savedSyllabus) {
+                        try {
+                            const parsed = JSON.parse(savedSyllabus);
+                            if (Array.isArray(parsed) && parsed.length > 0) {
+                                this.syllabus.forEach(item => {
+                                    const match = parsed.find(p => p.id === item.id);
+                                    if (match) {
+                                        item.status = match.status || 'To Do';
+                                        item.scheduledDate = match.scheduledDate || null;
+                                        item.notes = match.notes || '';
+                                    }
+                                });
+                            }
+                        } catch (e) {
+                            console.error("Local storage syllabus parsing failed:", e);
+                        }
+                    }
+
+                    const savedExamDate = localStorage.getItem('ultra_exam_target_date');
+                    if (savedExamDate) {
+                        this.examDate = savedExamDate;
+                    }
+
+                    const savedStreak = localStorage.getItem('study_streak_count');
+                    if (savedStreak) {
+                        this.streakCount = parseInt(savedStreak);
+                    }
+
+                    const savedTheme = localStorage.getItem('app_theme_dark');
+                    if (savedTheme !== null) {
+                        this.isDarkMode = JSON.parse(savedTheme);
+                    }
+
+                    this.calculateCountdown();
+                    
+                    // Timers and Digital Clock Initialization
+                    this.startStopwatch();
+                    this.updateDigitalClock();
+                    setInterval(() => {
+                        this.updateDigitalClock();
+                    }, 1000);
+
+                    this.$nextTick(() => {
+                        this.renderProgressChart();
+                    });
+                },
+
+                toggleTheme() {
+                    this.isDarkMode = !this.isDarkMode;
+                    localStorage.setItem('app_theme_dark', JSON.stringify(this.isDarkMode));
+                    this.$nextTick(() => {
+                        this.renderProgressChart();
+                    });
+                },
+
+                saveSyllabusToLocal() {
+                    localStorage.setItem('ultra_syllabus_data_backup', JSON.stringify(this.syllabus));
+                },
+
+                saveExamDate() {
+                    localStorage.setItem('ultra_exam_target_date', this.examDate);
+                    this.calculateCountdown();
+                },
+
+                calculateCountdown() {
+                    if (!this.examDate) return;
+                    const today = new Date();
+                    const target = new Date(this.examDate);
+                    const diffTime = target - today;
+                    this.daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                },
+
+                calculateWeeklyStudyGoal() {
+                    if (this.daysRemaining <= 0) return "Syllabus Complete or Deadline Passed";
+                    const remainingTopics = this.syllabus.filter(i => i.status !== 'Completed').length;
+                    if (remainingTopics === 0) return "All Modules Mastered!";
+                    const remainingWeeks = this.daysRemaining / 7;
+                    const goal = Math.ceil(remainingTopics / remainingWeeks);
+                    return goal + " Modules / Week";
+                },
+
+                incrementStreak() {
+                    const todayStr = new Date().toDateString();
+                    const lastDate = localStorage.getItem('study_streak_last_date');
+                    
+                    if (lastDate === todayStr) {
+                        alert("You have already logged your study block for today. Keep up the momentum!");
+                        return;
+                    }
+                    
+                    this.streakCount++;
+                    localStorage.setItem('study_streak_count', this.streakCount);
+                    localStorage.setItem('study_streak_last_date', todayStr);
+                    alert("Study session logged successfully. Streak incremented to " + this.streakCount + " days!");
+                },
+
+                // Filters
+                getTopicsByChapter(ch) {
+                    let results = this.syllabus.filter(i => i.chapter === ch);
+                    if (this.domainFilter !== 'All') {
+                        results = results.filter(i => i.domain === this.domainFilter);
+                    }
+                    if (this.searchQuery) {
+                        const q = this.searchQuery.toLowerCase().trim();
+                        results = results.filter(i => {
+                            return i.topic.toLowerCase().includes(q) ||
+                                   i.references.toLowerCase().includes(q) ||
+                                   (i.sections && Object.values(i.sections).flat().some(s => s.toLowerCase().includes(q)));
+                        });
+                    }
+                    return results;
+                },
+
+                getTotalSubtopics(item) {
+                    if (!item.sections) return 0;
+                    return Object.values(item.sections).flat().length;
+                },
+
+                get filteredTopics() {
+                    let results = this.syllabus;
+                    if (this.domainFilter !== 'All') {
+                        results = results.filter(i => i.domain === this.domainFilter);
+                    }
+                    if (this.searchQuery) {
+                        const q = this.searchQuery.toLowerCase().trim();
+                        results = results.filter(i => {
+                            return i.topic.toLowerCase().includes(q) ||
+                                   (i.sections && Object.values(i.sections).flat().some(s => s.toLowerCase().includes(q)));
+                        });
+                    }
+                    return results;
+                },
+
+                // Progress Metrics
+                get completedCount() { return this.syllabus.filter(i => i.status === 'Completed').length; },
+                get inProgressCount() { return this.syllabus.filter(i => i.status === 'In Progress').length; },
+                get todoCount() { return this.syllabus.filter(i => i.status === 'To Do').length; },
+                get notesCount() { return this.syllabus.filter(i => i.notes && i.notes.trim().length > 0).length; },
+                get completionPercentage() {
+                    if (this.syllabus.length === 0) return 0;
+                    return Math.round((this.completedCount / this.syllabus.length) * 100);
+                },
+                get scheduledItems() {
+                    return this.syllabus.filter(i => i.scheduledDate !== null)
+                        .sort((a, b) => new Date(a.scheduledDate) - new Date(b.scheduledDate));
+                },
+
+                updateStatus(id, newStatus) {
+                    const idx = this.syllabus.findIndex(i => i.id === id);
+                    if (idx !== -1) {
+                        this.syllabus[idx].status = newStatus;
+                        this.saveSyllabusToLocal();
+                        this.renderProgressChart();
+                    }
+                },
+
+                // Drawer workspace functions
+                openSyllabusDrawer(topic) {
+                    this.activeDrawerTopic = topic;
+                    this.drawerScheduleDate = topic.scheduledDate || '';
+                    this.isDrawerOpen = true;
+                },
+
+                closeSyllabusDrawer() {
+                    this.isDrawerOpen = false;
+                    this.saveSyllabusToLocal();
+                },
+
+                scheduleFromDrawer() {
+                    if (this.drawerScheduleDate) {
+                        const idx = this.syllabus.findIndex(i => i.id === this.activeDrawerTopic.id);
+                        if (idx !== -1) {
+                            this.syllabus[idx].scheduledDate = this.drawerScheduleDate;
+                            this.saveSyllabusToLocal();
+                            this.closeSyllabusDrawer();
+                        }
+                    }
+                },
+
+                scheduleItem() {
+                    if (this.plannerForm.id && this.plannerForm.date) {
+                        const idx = this.syllabus.findIndex(i => i.id == this.plannerForm.id);
+                        if (idx !== -1) {
+                            this.syllabus[idx].scheduledDate = this.plannerForm.date;
+                            this.saveSyllabusToLocal();
+                            this.plannerForm.id = '';
+                            this.plannerForm.date = '';
+                        }
+                    }
+                },
+
+                unscheduleItem(id) {
+                    const idx = this.syllabus.findIndex(i => i.id === id);
+                    if (idx !== -1) {
+                        this.syllabus[idx].scheduledDate = null;
+                        this.saveSyllabusToLocal();
+                    }
+                },
+
+                // Custom module creator
+                createCustomSyllabusNode() {
+                    if (this.newTopicForm.topic && this.newTopicForm.subtopics) {
+                        const subArr = this.newTopicForm.subtopics.split(',').map(s => s.trim());
+                        const newNode = {
+                            id: Date.now(),
+                            chapter: 'Chapter 4: Clinical Subspecialty Anesthesia', // Defaults into clinical
+                            domain: this.newTopicForm.domain,
+                            topic: this.newTopicForm.topic,
+                            subtopics: subArr,
+                            tags: ['custom', this.newTopicForm.domain.toLowerCase()],
+                            sections: {
+                                physiology: subArr,
+                                pharmacology: [],
+                                measurement: [],
+                                clinical: []
+                            },
+                            references: "Custom Reference Node",
+                            status: 'To Do',
+                            scheduledDate: null,
+                            notes: ''
+                        };
+                        this.syllabus.push(newNode);
+                        this.saveSyllabusToLocal();
+                        this.newTopicForm.topic = '';
+                        this.newTopicForm.subtopics = '';
+                        this.isTopicCreatorOpen = false;
+                        this.renderProgressChart();
+                    }
+                },
+
+                // Export/Import of records [1]
+                exportSyllabusData() {
+                    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(this.syllabus));
+                    const dlAnchorElem = document.createElement('a');
+                    dlAnchorElem.setAttribute("href", dataStr);
+                    dlAnchorElem.setAttribute("download", "FRCA_EDAIC_Notes_Backup.json");
+                    dlAnchorElem.click();
+                },
+
+                importSyllabusData(event) {
+                    const file = event.target.files[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        try {
+                            const imported = JSON.parse(e.target.result);
+                            if (Array.isArray(imported)) {
+                                this.syllabus = imported;
+                                this.saveSyllabusToLocal();
+                                this.renderProgressChart();
+                                alert("Syllabus records and study notes updated.");
+                            } else {
+                                alert("Invalid JSON format.");
+                            }
+                        } catch (err) {
+                            alert("Failed to parse file.");
+                        }
+                    };
+                    reader.readAsText(file);
+                },
+
+                // Stopwatch Session Timer Engine
+                startStopwatch() {
+                    this.stopwatchInterval = setInterval(() => {
+                        this.stopwatchSeconds++;
+                    }, 1000);
+                },
+                formatStopwatch(totalSeconds) {
+                    const hours = Math.floor(totalSeconds / 3600);
+                    const minutes = Math.floor((totalSeconds % 3600) / 60);
+                    const seconds = totalSeconds % 60;
+                    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                },
+                updateDigitalClock() {
+                    const now = new Date();
+                    this.currentTimeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                },
+
+                // Pomodoro Timer Logic
+                formatTime(m, s) {
+                    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+                },
+                togglePomo() {
+                    if (this.pomoActive) {
+                        clearInterval(this.pomoInterval);
+                        this.pomoActive = false;
+                    } else {
+                        this.pomoActive = true;
+                        this.pomoInterval = setInterval(() => {
+                            if (this.pomoSeconds === 0) {
+                                if (this.pomoMinutes === 0) {
+                                    if (this.pomoMode === 'work') {
+                                        this.pomoMode = 'break';
+                                        this.pomoMinutes = 5;
+                                    } else {
+                                        this.pomoMode = 'work';
+                                        this.pomoMinutes = 25;
+                                    }
+                                } else {
+                                    this.pomoMinutes--;
+                                    this.pomoSeconds = 59;
+                                }
+                            } else {
+                                this.pomoSeconds--;
+                            }
+                        }, 1000);
+                    }
+                },
+                resetPomo() {
+                    clearInterval(this.pomoInterval);
+                    this.pomoActive = false;
+                    this.pomoMode = 'work';
+                    this.pomoMinutes = 25;
+                    this.pomoSeconds = 0;
+                },
+                setPomoPreset(minutes) {
+                    clearInterval(this.pomoInterval);
+                    this.pomoActive = false;
+                    this.pomoMode = 'work';
+                    this.pomoMinutes = minutes;
+                    this.pomoSeconds = 0;
+                },
+
+                // Oral Board Practice Timer engine (Simulates 10-min SOE loops)
+                toggleVivaTimer() {
+                    if (this.vivaActive) {
+                        clearInterval(this.vivaInterval);
+                        this.vivaActive = false;
+                    } else {
+                        this.vivaActive = true;
+                        this.vivaInterval = setInterval(() => {
+                            if (this.vivaSeconds === 0) {
+                                if (this.vivaMinutes === 0) {
+                                    clearInterval(this.vivaInterval);
+                                    this.vivaActive = false;
+                                    alert("Oral board practice loop complete!");
+                                } else {
+                                    this.vivaMinutes--;
+                                    this.vivaSeconds = 59;
+                                }
+                            } else {
+                                this.vivaSeconds--;
+                            }
+                        }, 1000);
+                    }
+                },
+                resetVivaTimer() {
+                    clearInterval(this.vivaInterval);
+                    this.vivaActive = false;
+                    this.vivaMinutes = 10;
+                    this.vivaSeconds = 0;
+                },
+
+                // Chart.js safe renderer with presence check guards
+                renderProgressChart() {
+                    const canvas = document.getElementById('progressRadialChart');
+                    if (!canvas) return; // Silent return if the DOM canvas is not present yet
+                    const ctx = canvas.getContext('2d');
+                    if (!ctx) return;
+
+                    if (this.chart) {
+                        this.chart.destroy();
+                    }
+
+                    const isDark = this.isDarkMode;
+                    const labelColor = isDark ? '#94a3b8' : '#475569';
+
+                    this.chart = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Completed', 'In Progress', 'To Do'],
+                            datasets: [{
+                                data: [this.completedCount, this.inProgressCount, this.todoCount],
+                                backgroundColor: ['#4a6b51', '#a17858', isDark ? '#1e293b' : '#cbd5e1'],
+                                borderWidth: 0,
+                                hoverOffset: 4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                    labels: {
+                                        color: labelColor,
+                                        font: { size: 10, family: 'Plus Jakarta Sans' }
+                                    }
+                                }
+                            },
+                            cutout: '72%'
+                        }
+                    });
+                }
+            }
+        }
+    </script>
+</body>
+</html>
