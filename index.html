@@ -4,12 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Anesthesia MD - Board Study Companion</title>
-    <!-- Google Fonts: Plus Jakarta Sans (Highly readable UI) -->
+    <!-- Google Fonts: Plus Jakarta Sans (Modern UI / Max Readability) -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <!-- Inline SVG Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🩺</text></svg>">
+    
+    <!-- Embedded Web App Manifest for stand-alone PWA installability -->
+    <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjogIkFuZXN0aGVzaWEgTUQiLCAic2hvcnRfbmFtZSI6ICJBbmVzdGhlc2lhIE1EIiwgInN0YXJ0X3VybCI6ICIuIiwgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsICJiYWNrZ3JvdW5kX2NvbG9yIjogIiMwYTBmMGIiLCAidGhlbWVfY29sb3IiOiAiIzRhNmI1MSIsICJkZXNjcmlwdGlvbiI6ICJQcmVtaXVtIEZSQ0EgJiBfREFJQyBCb2FyZCBTdHVkeSBDb21wYW5pb24iLCAiaWNvbnMiOiBbIHsgInNyYyI6ICJkYXRhOmltYWdlL3N2Zyt4bWwsPHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxMDAgMTAwJz48cmVjdCB3aWR0aD0nMTAwJyBoZWlnaHQ9JzEwMCcgcng9JzIwJyBmaWxsPSclMjM0YTZiNTEnLz48dGV4dCB5PScpLjc1ZW0nIHg9JzEwJyBmb250LXNpemU9JzcwJyBmaWxsPSd3aGl0ZSc+🩺PC90ZXh0Pjwvc3ZnPiIsICJzaXplcyI6ICI1MTJ4NTEyIiwgInR5cGUiOiAiaW1hZ2Uvc3ZnK3htbCIsICJwdXJwb3NlIjogImFueSIgfSBdfQ==">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Alpine.js -->
@@ -110,10 +117,10 @@
     <!-- App Shell Container -->
     <div class="flex flex-col xl:flex-row h-screen w-screen overflow-hidden relative">
         
-        <!-- Mobile Header Bar (Only visible on small devices to handle modular navigation overlays) -->
+        <!-- Mobile Header Bar (Only visible on small devices) -->
         <header class="xl:hidden h-16 bg-[#f4f0e3] dark:bg-slate-900 border-b border-neutralPaper-300 dark:border-slate-800 flex items-center justify-between px-6 shrink-0 z-40 transition-colors">
             <div class="flex items-center space-x-3">
-                <button @click="isMobileMenuOpen = true" class="p-2 -ml-2 text-slate-700 dark:text-slate-350 hover:text-brand-500 transition" title="Open Study menu">
+                <button @click="isMobileMenuOpen = true" class="p-2 -ml-2 text-slate-700 dark:text-slate-355 hover:text-brand-500 transition" title="Open Study menu">
                     <i class="fa-solid fa-bars text-lg"></i>
                 </button>
                 <h1 class="font-extrabold text-base text-slate-900 dark:text-white" x-text="getTabName()">Anesthesia MD</h1>
@@ -154,13 +161,13 @@
                     </button>
                 </div>
 
-                <!-- Navigation List (Independently scrolls) -->
+                <!-- Navigation List (Scrolls independently of bottom widgets) -->
                 <nav class="flex-1 overflow-y-auto p-4 space-y-1.5">
                     <button @click="currentTab = 'dashboard'; isMobileMenuOpen = false;" :class="currentTab === 'dashboard' ? 'bg-brand-50 dark:bg-slate-800 text-brand-700 dark:text-white font-bold shadow-sm border border-brand-500/10' : 'text-slate-655 dark:text-slate-400 hover:bg-neutralPaper-100 dark:hover:bg-slate-800/40'" class="w-full flex items-center space-x-3.5 px-4 py-3.5 rounded-xl transition">
                         <i class="fa-solid fa-chart-pie w-5 text-center text-brand-600 dark:text-brand-500"></i>
                         <span class="text-sm font-bold">Dashboard Analytics</span>
                     </button>
-                    <button @click="currentTab = 'syllabus'" :class="currentTab === 'syllabus' ? 'bg-brand-50 dark:bg-slate-800 text-brand-700 dark:text-white font-bold shadow-sm border border-brand-500/10' : 'text-slate-655 dark:text-slate-400 hover:bg-neutralPaper-100 dark:hover:bg-slate-800/40'" class="w-full flex items-center space-x-3.5 px-4 py-3.5 rounded-xl transition">
+                    <button @click="currentTab = 'syllabus'; isMobileMenuOpen = false;" :class="currentTab === 'syllabus' ? 'bg-brand-50 dark:bg-slate-800 text-brand-700 dark:text-white font-bold shadow-sm border border-brand-500/10' : 'text-slate-655 dark:text-slate-400 hover:bg-neutralPaper-100 dark:hover:bg-slate-800/40'" class="w-full flex items-center space-x-3.5 px-4 py-3.5 rounded-xl transition">
                         <i class="fa-solid fa-book-medical w-5 text-center text-brand-600 dark:text-[#8ea68c]"></i>
                         <span class="text-sm font-bold">Curriculum Chapters</span>
                     </button>
@@ -187,15 +194,15 @@
                     <!-- Session/Daily Study Streak Widget -->
                     <div class="bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-neutralPaper-300 dark:border-slate-800/60 flex justify-between items-center shadow-sm">
                         <div>
-                            <span class="text-[9px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider block">Revision Streak</span>
+                            <span class="text-[9px] font-bold text-slate-455 dark:text-slate-500 uppercase tracking-wider block">Revision Streak</span>
                             <span class="text-base font-extrabold text-slate-900 dark:text-white" x-text="streakCount + ' Days'">1 Day</span>
                         </div>
                         <button @click="incrementStreak()" class="w-9 h-9 rounded-xl bg-orange-100 dark:bg-orange-950/45 text-orange-500 flex items-center justify-center transition hover:scale-105 active:scale-95" title="Log study block for today">
-                            <i class="fa-solid fa-fire text-lg animate-none"></i>
+                            <i class="fa-solid fa-fire text-lg"></i>
                         </button>
                     </div>
 
-                    <!-- Focus Pomodoro System (Upgraded to integrate Work vs Break states) -->
+                    <!-- Focus Pomodoro System -->
                     <div class="bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-neutralPaper-300 dark:border-slate-800/60 space-y-2.5 shadow-sm" :class="pomoActive ? 'animate-pulse-glow border-brand-500/40' : ''">
                         <div class="flex justify-between items-center">
                             <span class="text-[9px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider">Interval Timer</span>
@@ -225,9 +232,9 @@
                             <div class="space-y-1">
                                 <span class="text-[8px] font-extrabold uppercase text-slate-400 tracking-wider block text-center">Break limits</span>
                                 <div class="grid grid-cols-3 gap-0.5">
-                                    <button @click="setPomoMode('break', 5)" class="text-[8px] font-bold py-1 bg-slate-50 dark:bg-slate-950 rounded hover:bg-accent-100 text-slate-500 dark:text-slate-400">5m</button>
-                                    <button @click="setPomoMode('break', 10)" class="text-[8px] font-bold py-1 bg-slate-50 dark:bg-slate-950 rounded hover:bg-accent-100 text-slate-500 dark:text-slate-400">10m</button>
-                                    <button @click="setPomoMode('break', 15)" class="text-[8px] font-bold py-1 bg-slate-50 dark:bg-slate-950 rounded hover:bg-accent-100 text-slate-500 dark:text-slate-400">15m</button>
+                                    <button @click="setPomoMode('break', 5)" class="text-[8px] font-bold py-1 bg-slate-50 dark:bg-slate-950 rounded hover:bg-brand-50 text-slate-500 dark:text-slate-400">5m</button>
+                                    <button @click="setPomoMode('break', 10)" class="text-[8px] font-bold py-1 bg-slate-50 dark:bg-slate-950 rounded hover:bg-brand-50 text-slate-500 dark:text-slate-400">10m</button>
+                                    <button @click="setPomoMode('break', 15)" class="text-[8px] font-bold py-1 bg-slate-50 dark:bg-slate-950 rounded hover:bg-brand-50 text-slate-500 dark:text-slate-400">15m</button>
                                 </div>
                             </div>
                         </div>
@@ -243,7 +250,7 @@
                 <div class="flex items-center space-x-4 w-full max-w-lg">
                     <div class="relative w-full">
                         <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 dark:text-slate-500">
-                            <i class="fa-solid fa-magnifying-glass text-xs animate-none"></i>
+                            <i class="fa-solid fa-magnifying-glass text-xs"></i>
                         </span>
                         <input type="text" 
                                x-model="searchQuery" 
@@ -254,10 +261,10 @@
                 </div>
                 <div class="flex items-center space-x-3.5 ml-4">
                     <button @click="exportSyllabusData()" class="text-xs font-semibold text-slate-655 dark:text-slate-400 hover:text-brand-500 dark:hover:text-[#8ea68c] transition" title="Backup notes and state to local JSON file">
-                        <i class="fa-solid fa-file-export mr-1 animate-none"></i> Export notes
+                        <i class="fa-solid fa-file-export mr-1"></i> Export notes
                     </button>
                     <label class="text-xs font-semibold text-slate-655 dark:text-slate-400 hover:text-indigo-500 dark:hover:text-indigo-400 cursor-pointer transition" title="Restore notes and progress">
-                        <i class="fa-solid fa-file-import mr-1 animate-none"></i> Import notes
+                        <i class="fa-solid fa-file-import mr-1"></i> Import notes
                         <input type="file" @change="importSyllabusData($event)" class="hidden">
                     </label>
                 </div>
@@ -276,7 +283,7 @@
                     <!-- Statistics Cards -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div class="bg-white dark:bg-slate-900 border border-neutralPaper-300 dark:border-slate-800 rounded-2xl p-6 relative overflow-hidden transition-colors">
-                            <span class="text-xs text-slate-450 dark:text-slate-400 font-bold uppercase tracking-wider block">Total Progress</span>
+                            <span class="text-xs text-slate-455 dark:text-slate-400 font-bold uppercase tracking-wider block">Total Progress</span>
                             <div class="flex items-baseline space-x-2 mt-2">
                                 <span class="text-3xl font-black text-slate-900 dark:text-white" x-text="completionPercentage + '%'">0%</span>
                                 <span class="text-xs text-brand-600 dark:text-brand-400 font-bold">Mastered</span>
@@ -286,17 +293,17 @@
                             </div>
                         </div>
                         <div class="bg-white dark:bg-slate-900 border border-neutralPaper-300 dark:border-slate-800 rounded-2xl p-6 transition-colors">
-                            <span class="text-xs text-slate-450 dark:text-slate-400 font-bold uppercase tracking-wider block">In Progress</span>
+                            <span class="text-xs text-slate-455 dark:text-slate-400 font-bold uppercase tracking-wider block">In Progress</span>
                             <p class="text-3xl font-black text-amber-500 mt-2" x-text="inProgressCount"></p>
                             <span class="text-[10px] text-slate-550 dark:text-slate-450 block mt-1.5">Syllabus nodes actively studied</span>
                         </div>
                         <div class="bg-white dark:bg-slate-900 border border-neutralPaper-300 dark:border-slate-800 rounded-2xl p-6 transition-colors">
-                            <span class="text-xs text-slate-450 dark:text-slate-400 font-bold uppercase tracking-wider block">Unexplored</span>
+                            <span class="text-xs text-slate-455 dark:text-slate-400 font-bold uppercase tracking-wider block">Unexplored</span>
                             <p class="text-3xl font-black text-rose-500 mt-2" x-text="todoCount"></p>
                             <span class="text-[10px] text-slate-550 dark:text-slate-450 block mt-1.5">Topics requiring initial preparation</span>
                         </div>
                         <div class="bg-white dark:bg-slate-900 border border-neutralPaper-300 dark:border-slate-800 rounded-2xl p-6 transition-colors">
-                            <span class="text-xs text-slate-450 dark:text-slate-400 font-bold uppercase tracking-wider block">Study Records Written</span>
+                            <span class="text-xs text-slate-455 dark:text-slate-400 font-bold uppercase tracking-wider block">Study Records Written</span>
                             <p class="text-3xl font-black text-brand-500 dark:text-[#8ea68c] mt-2" x-text="notesCount"></p>
                             <span class="text-[10px] text-slate-550 dark:text-slate-450 block mt-1.5">Saved clinical summaries</span>
                         </div>
@@ -321,14 +328,14 @@
                                         <div class="bg-slate-50 dark:bg-slate-950 p-3.5 rounded-xl border border-neutralPaper-200 dark:border-slate-850 flex justify-between items-center text-xs">
                                             <div>
                                                 <p class="font-bold text-slate-800 dark:text-slate-250 text-sm" x-text="item.topic"></p>
-                                                <span class="text-[10px] text-slate-500 dark:text-slate-450 font-semibold" x-text="item.scheduledDate"></span>
+                                                <span class="text-[10px] text-slate-550 dark:text-slate-450 font-semibold" x-text="item.scheduledDate"></span>
                                             </div>
                                             <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-brand-100 dark:bg-brand-900/30 text-brand-600 dark:text-brand-400" x-text="item.domain"></span>
                                         </div>
                                     </template>
                                     <template x-if="scheduledItems.length === 0">
                                         <div class="py-10 text-center text-slate-400 dark:text-slate-500 flex flex-col items-center">
-                                            <i class="fa-regular fa-calendar-check text-2xl mb-2 text-slate-300 dark:text-slate-700 animate-none"></i>
+                                            <i class="fa-regular fa-calendar-check text-2xl mb-2 text-slate-300 dark:text-slate-700"></i>
                                             <p class="text-xs">No pending milestones in schedule.</p>
                                         </div>
                                     </template>
@@ -358,10 +365,10 @@
                     <div class="bg-white dark:bg-slate-900 border border-neutralPaper-300 dark:border-slate-800 rounded-2xl p-5 flex flex-col md:flex-row justify-between items-center gap-4 transition-colors shadow-sm">
                         <div class="text-center md:text-left">
                             <h3 class="font-bold text-sm text-slate-900 dark:text-white">Add Custom Chapter Module</h3>
-                            <p class="text-[11px] text-slate-550 dark:text-slate-450 mt-0.5">Customize the master exam database to include local guidelines or specific clinical areas.</p>
+                            <p class="text-[11px] text-slate-550 dark:text-slate-455 mt-0.5">Customize the master exam database to include local guidelines or specific clinical areas.</p>
                         </div>
                         <button @click="isTopicCreatorOpen = true" class="px-4 py-2 bg-[#4a6b51] dark:bg-[#5a8b63] hover:bg-[#3b5540] text-white rounded-xl text-xs font-bold transition shadow-sm">
-                            <i class="fa-solid fa-plus mr-1 text-[10px] animate-none"></i> Add Custom Module
+                            <i class="fa-solid fa-plus mr-1 text-[10px]"></i> Add Custom Module
                         </button>
                     </div>
 
@@ -381,7 +388,7 @@
                                                 class="w-full text-left bg-white dark:bg-slate-900 border border-neutralPaper-300 dark:border-slate-800 rounded-2xl p-6 flex flex-col justify-between hover:border-slate-350 dark:hover:border-slate-700 transition-all duration-300 hover:-translate-y-1 textbook-card">
                                             <div class="w-full">
                                                 <div class="flex justify-between items-start mb-3.5 w-full">
-                                                    <span class="text-[9px] font-bold uppercase tracking-wider bg-brand-50 dark:bg-slate-850 text-brand-600 dark:text-[#8ea68c] px-2.5 py-1 rounded-lg border border-brand-500/10 animate-none" x-text="item.domain"></span>
+                                                    <span class="text-[9px] font-bold uppercase tracking-wider bg-brand-50 dark:bg-slate-850 text-brand-600 dark:text-[#8ea68c] px-2.5 py-1 rounded-lg border border-brand-500/10" x-text="item.domain"></span>
                                                     
                                                     <!-- Status Indicators -->
                                                     <span :class="{
@@ -389,7 +396,7 @@
                                                         'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800/60': item.status === 'In Progress',
                                                         'bg-slate-100 dark:bg-slate-850 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-855': item.status === 'To Do'
                                                     }" class="px-2.5 py-1 rounded-full text-[10px] font-bold border flex items-center space-x-1.5 transition">
-                                                        <span class="w-1.5 h-1.5 rounded-full animate-none" :class="{
+                                                        <span class="w-1.5 h-1.5 rounded-full" :class="{
                                                             'bg-emerald-500': item.status === 'Completed',
                                                             'bg-amber-500': item.status === 'In Progress',
                                                             'bg-slate-400': item.status === 'To Do'
@@ -399,17 +406,17 @@
                                                 </div>
 
                                                 <h4 class="font-extrabold text-lg text-slate-900 dark:text-white hover:text-brand-655 dark:hover:text-[#8ea68c] transition" x-text="item.topic"></h4>
-                                                <p class="text-[11px] italic font-semibold text-accent-500 dark:text-accent-400 mt-1.5" x-text="item.references"></p>
+                                                <p class="text-[11px] italic font-semibold text-accent-500 dark:text-accent-400 mt-2" x-text="item.references"></p>
                                             </div>
 
                                             <div class="border-t border-slate-100 dark:border-slate-800/80 pt-4 flex items-center justify-between mt-5 w-full">
                                                 <span class="text-[10px] text-slate-455 dark:text-slate-505 font-bold flex items-center space-x-1.5">
-                                                    <i class="fa-solid fa-layer-group text-brand-500 animate-none"></i>
+                                                    <i class="fa-solid fa-layer-group text-brand-500"></i>
                                                     <span x-text="getTotalSubtopics(item) + ' Core Points'"></span>
                                                 </span>
                                                 <span class="text-xs font-bold text-[#4a6b51] dark:text-[#8ea68c] hover:underline flex items-center space-x-1">
                                                     <span>Open Workspace</span>
-                                                    <i class="fa-solid fa-chevron-right text-[10px] animate-none"></i>
+                                                    <i class="fa-solid fa-chevron-right text-[10px]"></i>
                                                 </span>
                                             </div>
                                         </button>
@@ -493,7 +500,7 @@
                                 <input type="date" x-model="plannerForm.date" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2.5 text-slate-700 dark:text-slate-300 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500 transition">
                             </div>
                             <div class="flex items-end">
-                                <button @click="scheduleItem()" class="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-2.5 rounded-xl transition text-xs shadow-sm animate-none">
+                                <button @click="scheduleItem()" class="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-2.5 rounded-xl transition text-xs shadow-sm">
                                     Add Study Event
                                 </button>
                             </div>
@@ -520,7 +527,7 @@
                                         </td>
                                         <td class="px-6 py-4 text-slate-600 dark:text-slate-300" x-text="item.scheduledDate"></td>
                                         <td class="px-6 py-4 text-right">
-                                            <button @click="unscheduleItem(item.id)" class="text-rose-500 hover:underline font-bold text-[10px] animate-none">Cancel Schedule</button>
+                                            <button @click="unscheduleItem(item.id)" class="text-rose-500 hover:underline font-bold text-[10px]">Cancel Schedule</button>
                                         </td>
                                     </tr>
                                 </template>
@@ -545,7 +552,7 @@
                         </p>
                     </div>
 
-                    <!-- Free Open-Access Matrix -->
+                    <!-- Free Resources Section -->
                     <div class="space-y-4">
                         <h3 class="text-xs font-sans uppercase font-bold tracking-widest text-[#4a6b51] dark:text-[#8ea68c] border-b border-neutralPaper-300 dark:border-slate-800 pb-2">Free Open-Access Academic Databases</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -553,126 +560,66 @@
                                 <div>
                                     <div class="flex items-center space-x-3 mb-3">
                                         <div class="w-9 h-9 rounded-xl bg-teal-100 dark:bg-teal-950/45 text-teal-600 dark:text-teal-400 flex items-center justify-center">
-                                            <i class="fa-solid fa-graduation-cap text-sm animate-none"></i>
+                                            <i class="fa-solid fa-graduation-cap text-sm"></i>
                                         </div>
                                         <h4 class="font-bold text-base text-slate-900 dark:text-white">Deranged Physiology</h4>
                                     </div>
-                                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed font-sans">
-                                        The most robust, clinically detailed physiological database online. Indispensable for Stewart physical-chemical acid-base mechanics and cardiac PV curves [1].
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
+                                        The gold standard for physiological mechanisms, ICU medicine, and acid-base kinetics. Excellent diagrams and exam reviews [1].
                                     </p>
                                 </div>
-                                <a href="https://derangedphysiology.com" target="_blank" class="w-full text-center bg-teal-50 dark:bg-teal-950/40 hover:bg-teal-100 dark:hover:bg-teal-900/40 text-teal-700 dark:text-teal-450 py-2.5 rounded-xl border border-teal-200 dark:border-teal-800 transition text-xs font-bold">Visit Database <i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[10px] animate-none"></i></a>
+                                <a href="https://derangedphysiology.com" target="_blank" class="w-full text-center bg-teal-50 dark:bg-teal-950/40 hover:bg-teal-100 dark:hover:bg-teal-900/40 text-teal-700 dark:text-teal-455 py-2.5 rounded-xl border border-teal-200 dark:border-neutralPaper-300 transition text-xs font-bold">Visit Site <i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[10px]"></i></a>
                             </div>
 
                             <div class="bg-white dark:bg-slate-900 border border-neutralPaper-300 dark:border-slate-800 rounded-3xl p-6 flex flex-col justify-between shadow-sm">
                                 <div>
                                     <div class="flex items-center space-x-3 mb-3">
                                         <div class="w-9 h-9 rounded-xl bg-brand-100 dark:bg-brand-950/45 text-brand-600 dark:text-[#8ea68c] flex items-center justify-center">
-                                            <i class="fa-solid fa-book-open text-sm animate-none"></i>
+                                            <i class="fa-solid fa-book-open text-sm"></i>
                                         </div>
                                         <h4 class="font-bold text-base text-slate-900 dark:text-white">OpenAnesthesia</h4>
                                     </div>
                                     <p class="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
-                                        The official IARS wiki study resource. High-yield reviews of clinical monitoring technology and local anesthetic profiles.
+                                        IARS multimedia wiki engine. Strong on clinical equipment, regional anesthesia loops, and pharmacological parameters.
                                     </p>
                                 </div>
-                                <a href="https://www.openanaesthesia.org" target="_blank" class="w-full text-center bg-brand-50 dark:bg-brand-950/40 hover:bg-brand-100 dark:hover:bg-brand-900/40 text-brand-700 dark:text-[#8ea68c] py-2.5 rounded-xl border border-brand-200 dark:border-brand-800 transition text-xs font-bold">Visit Database <i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[10px] animate-none"></i></a>
-                            </div>
-
-                            <div class="bg-white dark:bg-slate-900 border border-neutralPaper-300 dark:border-slate-800 rounded-3xl p-6 flex flex-col justify-between shadow-sm">
-                                <div>
-                                    <div class="flex items-center space-x-3 mb-3">
-                                        <div class="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-950/45 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-                                            <i class="fa-solid fa-hospital-user text-sm animate-none"></i>
-                                        </div>
-                                        <h4 class="font-bold text-base text-slate-900 dark:text-white">BJA Education (BJAed)</h4>
-                                    </div>
-                                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
-                                        Factual, peer-reviewed clinical articles published directly with RCOA / ESAIC training targets in mind. Excellent for specific clinical measurement updates.
-                                    </p>
-                                </div>
-                                <a href="https://bjaed.org" target="_blank" class="w-full text-center bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 text-emerald-700 dark:text-emerald-450 py-2.5 rounded-xl border border-emerald-200 dark:border-emerald-800 transition text-xs font-bold">Visit Database <i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[10px] animate-none"></i></a>
-                            </div>
-
-                            <div class="bg-white dark:bg-slate-900 border border-neutralPaper-300 dark:border-slate-800 rounded-3xl p-6 flex flex-col justify-between shadow-sm">
-                                <div>
-                                    <div class="flex items-center space-x-3 mb-3">
-                                        <div class="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-950/45 text-amber-600 dark:text-amber-400 flex items-center justify-center">
-                                            <i class="fa-solid fa-circle-nodes text-sm animate-none"></i>
-                                        </div>
-                                        <h4 class="font-bold text-base text-slate-900 dark:text-white">LITFL Critical Care</h4>
-                                    </div>
-                                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
-                                        Unmatched for intensive toxicology indices, metabolic shifting maps, and advanced electrocardiography. High yield for critical care.
-                                    </p>
-                                </div>
-                                <a href="https://litfl.com" target="_blank" class="w-full text-center bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/40 text-amber-700 dark:text-amber-450 py-2.5 rounded-xl border border-amber-200 dark:border-amber-800 transition text-xs font-bold">Visit Database <i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[10px] animate-none"></i></a>
-                            </div>
-
-                            <div class="bg-white dark:bg-slate-900 border border-neutralPaper-300 dark:border-slate-800 rounded-3xl p-6 flex flex-col justify-between shadow-sm">
-                                <div>
-                                    <div class="flex items-center space-x-3 mb-3">
-                                        <div class="w-9 h-9 rounded-xl bg-indigo-100 dark:bg-indigo-950/45 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
-                                            <i class="fa-solid fa-compass-drafting text-sm animate-none"></i>
-                                        </div>
-                                        <h4 class="font-bold text-base text-slate-900 dark:text-white">NYSORA Regional Anesthesia</h4>
-                                    </div>
-                                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
-                                        The global gold standard for nerve block pathways, ultrasound-guided landmarks, local anesthetic toxicity calculations, and clinical regional training modules.
-                                    </p>
-                                </div>
-                                <a href="https://www.nysora.com" target="_blank" class="w-full text-center bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 text-indigo-700 dark:text-indigo-450 py-2.5 rounded-xl border border-indigo-200 dark:border-indigo-800 transition text-xs font-bold">Visit Database <i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[10px] animate-none"></i></a>
-                            </div>
-
-                            <div class="bg-white dark:bg-slate-900 border border-neutralPaper-300 dark:border-slate-800 rounded-3xl p-6 flex flex-col justify-between shadow-sm">
-                                <div>
-                                    <div class="flex items-center space-x-3 mb-3">
-                                        <div class="w-9 h-9 rounded-xl bg-violet-100 dark:bg-violet-950/45 text-violet-650 dark:text-violet-400 flex items-center justify-center">
-                                            <i class="fa-solid fa-scale-balanced text-sm animate-none"></i>
-                                        </div>
-                                        <h4 class="font-bold text-base text-slate-900 dark:text-white">Difficult Airway Society (DAS)</h4>
-                                    </div>
-                                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
-                                        Access critical guidelines for unanticipated difficult intubations, failed obstetric airways, extubation protocols, and emergency surgical FONA algorithms.
-                                    </p>
-                                </div>
-                                <a href="https://das.uk.com" target="_blank" class="w-full text-center bg-violet-50 dark:bg-violet-950/40 hover:bg-violet-100 dark:hover:bg-violet-900/40 text-violet-750 dark:text-violet-400 py-2.5 rounded-xl border border-violet-200 dark:border-violet-800 transition text-xs font-bold">Visit Database <i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[10px] animate-none"></i></a>
+                                <a href="https://www.openanaesthesia.org" target="_blank" class="w-full text-center bg-brand-50 dark:bg-brand-950/40 hover:bg-brand-100 dark:hover:bg-brand-900/40 text-brand-700 dark:text-brand-400 py-2.5 rounded-xl border border-brand-200 dark:border-brand-800 transition text-xs font-bold">Visit Site <i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[10px]"></i></a>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Recommended Premium Paid Databases -->
+                    <!-- Paid Resources Section -->
                     <div class="space-y-4">
-                        <h3 class="text-xs font-sans uppercase font-bold tracking-widest text-[#a17858] border-b border-neutralPaper-300 dark:border-slate-800 pb-2">Highly Recommended Paid Platforms</h3>
+                        <h3 class="text-xs uppercase font-bold tracking-wider text-slate-400 dark:text-slate-500 border-b border-neutralPaper-300 dark:border-slate-800 pb-2">Highly Recommended Paid Resources</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div class="bg-white dark:bg-slate-900 border border-neutralPaper-300 dark:border-slate-800 rounded-3xl p-6 flex flex-col justify-between shadow-sm">
                                 <div>
                                     <div class="flex items-center space-x-3 mb-3">
                                         <div class="w-9 h-9 rounded-xl bg-indigo-100 dark:bg-indigo-950/45 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
-                                            <i class="fa-solid fa-graduation-cap text-sm animate-none"></i>
+                                            <i class="fa-solid fa-laptop-code text-sm"></i>
                                         </div>
                                         <h4 class="font-bold text-base text-slate-900 dark:text-white">e-Learning for Anaesthesia (e-LA)</h4>
                                     </div>
-                                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed font-sans">
-                                        The official Royal College of Anaesthetists (RCoA) training module portal. Extremely granular coverage of the primary exam physics, equipment, and clinical guidelines.
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
+                                        The official interactive modules of the RCoA (Royal College of Anaesthetists). Extremely high fidelity and designed strictly around the primary/final syllabus structures.
                                     </p>
                                 </div>
-                                <span class="text-[10px] text-slate-400 italic block mb-2">Access: Paid / Free via NHS OpenAthens / Professional Subscription</span>
+                                <span class="text-[10px] text-slate-400 italic block mb-2">Access: Paid / Free via NHS portal</span>
                             </div>
 
                             <div class="bg-white dark:bg-slate-900 border border-neutralPaper-300 dark:border-slate-800 rounded-3xl p-6 flex flex-col justify-between shadow-sm">
                                 <div>
                                     <div class="flex items-center space-x-3 mb-3">
-                                        <div class="w-9 h-9 rounded-xl bg-orange-100 dark:bg-orange-950/45 text-orange-600 dark:text-orange-400 flex items-center justify-center">
-                                            <i class="fa-solid fa-book text-sm animate-none"></i>
+                                        <div class="w-9 h-9 rounded-xl bg-violet-100 dark:bg-violet-950/45 text-violet-600 dark:text-violet-400 flex items-center justify-center">
+                                            <i class="fa-solid fa-book text-sm"></i>
                                         </div>
-                                        <h4 class="font-bold text-base text-slate-900 dark:text-white">The Primary FRCA Oral Study Guide</h4>
+                                        <h4 class="font-bold text-base text-slate-900 dark:text-white">Wijayasiri Primary FRCA Viva Book</h4>
                                     </div>
-                                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed font-sans">
-                                        Written by Wijayasiri et al. The undisputed gold-standard study textbook containing pre-modeled oral exam dialogue structures.
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
+                                        The ultimate structured oral exam practice guide. Highly structured prompts on pharmacology, physics, physiology, and clinical cases mapping directly to real board trends.
                                     </p>
                                 </div>
-                                <span class="text-[10px] text-slate-400 italic block mb-2">Available: Medical Bookstores & Online Booksellers</span>
+                                <span class="text-[10px] text-slate-400 italic block mb-2">Available: Medical bookstores / Amazon</span>
                             </div>
                         </div>
                     </div>
@@ -693,7 +640,7 @@
             <div class="flex items-center justify-between border-b border-neutralPaper-300 dark:border-slate-800 pb-4 mb-6 shrink-0">
                 <div>
                     <span class="text-[9px] font-bold uppercase tracking-wider bg-[#eae7dc] dark:bg-slate-850 text-brand-600 dark:text-brand-400 px-2.5 py-1 rounded-lg" x-text="activeDrawerTopic.domain"></span>
-                    <h3 class="font-serif font-extrabold text-2xl text-slate-900 dark:text-white mt-2" x-text="activeDrawerTopic.topic"></h3>
+                    <h3 class="font-extrabold text-2xl text-slate-900 dark:text-white mt-2" x-text="activeDrawerTopic.topic"></h3>
                     <p class="text-[11px] italic font-semibold text-accent-500 dark:text-accent-400 mt-1" x-text="'Ref: ' + activeDrawerTopic.references"></p>
                 </div>
                 <button @click="closeSyllabusDrawer()" class="text-slate-400 hover:text-slate-950 dark:hover:text-white p-2">
@@ -707,9 +654,9 @@
                 <div class="space-y-5">
                     <!-- Section 1: Physiology -->
                     <template x-if="activeDrawerTopic.sections && activeDrawerTopic.sections.physiology">
-                        <div class="bg-white dark:bg-slate-950 border border-neutralPaper-300 dark:border-slate-800/80 p-5 rounded-2xl">
+                        <div class="bg-white dark:bg-slate-950 border border-neutralPaper-300 dark:border-slate-800/80 p-5 rounded-2xl shadow-sm">
                             <h4 class="text-[11px] font-bold text-slate-405 dark:text-slate-500 uppercase tracking-widest mb-3 flex items-center space-x-1.5">
-                                <i class="fa-solid fa-heart-pulse text-brand-500 animate-none"></i>
+                                <i class="fa-solid fa-heart-pulse text-brand-500"></i>
                                 <span>Core Physiology Concepts</span>
                             </h4>
                             <ul class="space-y-3 text-sm text-slate-800 dark:text-slate-300 pl-1">
@@ -725,9 +672,9 @@
 
                     <!-- Section 2: Pharmacology -->
                     <template x-if="activeDrawerTopic.sections && activeDrawerTopic.sections.pharmacology">
-                        <div class="bg-white dark:bg-slate-950 border border-neutralPaper-300 dark:border-slate-800/80 p-5 rounded-2xl">
+                        <div class="bg-white dark:bg-slate-950 border border-neutralPaper-300 dark:border-slate-800/80 p-5 rounded-2xl shadow-sm">
                             <h4 class="text-[11px] font-bold text-slate-405 dark:text-slate-500 uppercase tracking-widest mb-3 flex items-center space-x-1.5">
-                                <i class="fa-solid fa-pills text-[#a37d65] animate-none"></i>
+                                <i class="fa-solid fa-pills text-[#a37d65]"></i>
                                 <span>Core Pharmacology Mechanisms</span>
                             </h4>
                             <ul class="space-y-3 text-sm text-slate-800 dark:text-slate-300 pl-1">
@@ -743,9 +690,9 @@
 
                     <!-- Section 3: Equipment/Measurement -->
                     <template x-if="activeDrawerTopic.sections && activeDrawerTopic.sections.measurement">
-                        <div class="bg-white dark:bg-slate-950 border border-neutralPaper-300 dark:border-slate-800/80 p-5 rounded-2xl">
+                        <div class="bg-white dark:bg-slate-950 border border-neutralPaper-300 dark:border-slate-800/80 p-5 rounded-2xl shadow-sm">
                             <h4 class="text-[11px] font-bold text-slate-455 dark:text-slate-500 uppercase tracking-widest mb-3 flex items-center space-x-1.5">
-                                <i class="fa-solid fa-compass-drafting text-amber-500 animate-none"></i>
+                                <i class="fa-solid fa-compass-drafting text-amber-500"></i>
                                 <span>Physics & Measurement Specifications</span>
                             </h4>
                             <ul class="space-y-3 text-sm text-slate-800 dark:text-slate-300 pl-1">
@@ -761,9 +708,9 @@
 
                     <!-- Section 4: Clinical Implications -->
                     <template x-if="activeDrawerTopic.sections && activeDrawerTopic.sections.clinical">
-                        <div class="bg-white dark:bg-slate-950 border border-neutralPaper-300 dark:border-slate-800/80 p-5 rounded-2xl">
+                        <div class="bg-white dark:bg-slate-950 border border-neutralPaper-300 dark:border-slate-800/80 p-5 rounded-2xl shadow-sm">
                             <h4 class="text-[11px] font-bold text-slate-455 dark:text-slate-500 uppercase tracking-widest mb-3 flex items-center space-x-1.5">
-                                <i class="fa-solid fa-stethoscope text-emerald-500 animate-none"></i>
+                                <i class="fa-solid fa-stethoscope text-emerald-500"></i>
                                 <span>Key Clinical Implications</span>
                             </h4>
                             <ul class="space-y-3 text-sm text-slate-800 dark:text-slate-300 pl-1">
@@ -779,31 +726,31 @@
                 </div>
 
                 <!-- Video Resource Center (Specific YouTube Links) -->
-                <div class="bg-white dark:bg-slate-950 border border-neutralPaper-300 dark:border-slate-800 p-5 rounded-2xl">
+                <div class="bg-white dark:bg-slate-950 border border-neutralPaper-300 dark:border-slate-800 p-5 rounded-2xl shadow-sm">
                     <h4 class="text-[11px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-widest mb-3 flex items-center space-x-1.5 border-b border-slate-100 dark:border-slate-800 pb-2">
                         <i class="fa-brands fa-youtube text-red-500"></i>
                         <span>High-Yield Video Demonstrations</span>
                     </h4>
                     <div class="space-y-2">
-                        <a :href="`https://www.youtube.com/results?search_query=Count+Backwards+from+10+${encodeURIComponent(activeDrawerTopic.topic || '')}`" target="_blank" class="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-900 rounded-xl hover:bg-neutralPaper-100 dark:hover:bg-slate-800 transition">
+                        <a :href="`https://www.youtube.com/results?search_query=Count+Backwards+from+10+${encodeURIComponent(activeDrawerTopic.topic || '')}`" target="_blank" class="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-900 rounded-xl hover:bg-neutralPaper-100 dark:hover:bg-slate-880 transition">
                             <div class="flex items-center space-x-3">
-                                <i class="fa-solid fa-video text-brand-500 animate-none"></i>
+                                <i class="fa-solid fa-video text-brand-500"></i>
                                 <div>
                                     <p class="text-xs font-bold text-slate-800 dark:text-slate-100">Count Backwards From 10 Review</p>
                                     <p class="text-[9px] text-slate-550">Chalk talks and dynamic loops</p>
                                 </div>
                             </div>
-                            <i class="fa-solid fa-chevron-right text-[10px] text-slate-400 animate-none"></i>
+                            <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
                         </a>
-                        <a :href="`https://www.youtube.com/results?search_query=ABCs+of+Anaesthesia+${encodeURIComponent(activeDrawerTopic.topic || '')}`" target="_blank" class="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-900 rounded-xl hover:bg-neutralPaper-100 dark:hover:bg-slate-800 transition">
+                        <a :href="`https://www.youtube.com/results?search_query=ABCs+of+Anaesthesia+${encodeURIComponent(activeDrawerTopic.topic || '')}`" target="_blank" class="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-900 rounded-xl hover:bg-neutralPaper-100 dark:hover:bg-slate-880 transition">
                             <div class="flex items-center space-x-3">
-                                <i class="fa-solid fa-graduation-cap text-accent-500 animate-none"></i>
+                                <i class="fa-solid fa-graduation-cap text-accent-500"></i>
                                 <div>
                                     <p class="text-xs font-bold text-slate-800 dark:text-slate-100">ABCs of Anaesthesia Lectures</p>
                                     <p class="text-[9px] text-slate-555">Primary and Final board strategies</p>
                                 </div>
                             </div>
-                            <i class="fa-solid fa-chevron-right text-[10px] text-slate-400 animate-none"></i>
+                            <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
                         </a>
                     </div>
                 </div>
@@ -819,11 +766,11 @@
             </div>
 
             <!-- Set Date inside drawer -->
-            <div class="mt-6 border-t border-slate-100 dark:border-slate-800 pt-4 shrink-0 animate-none">
+            <div class="mt-6 border-t border-slate-100 dark:border-slate-800 pt-4 shrink-0">
                 <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Set Revision Target Date</label>
                 <div class="flex space-x-2">
                     <input type="date" x-model="drawerScheduleDate" class="flex-1 bg-slate-50 dark:bg-slate-950 border border-neutralPaper-300 dark:border-slate-800 rounded-xl px-3 py-2 text-slate-700 dark:text-slate-300 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500 transition">
-                    <button @click="scheduleFromDrawer()" class="bg-brand-600 hover:bg-brand-500 text-white font-bold px-4 py-2 rounded-xl transition text-xs shadow-sm">
+                    <button @click="scheduleFromDrawer()" class="bg-[#4a6b51] hover:bg-[#3b5540] text-white font-bold px-4 py-2 rounded-xl transition text-xs shadow-sm">
                         Schedule
                     </button>
                 </div>
@@ -1911,10 +1858,13 @@
                     this.$nextTick(() => {
                         this.renderProgressChart();
                     });
+
+                    // PWA Service Worker Registration using a local blob URL pathway to fulfill installability criteria
+                    this.registerServiceWorker();
                 },
 
                 toggleTheme() {
-                    this.isDarkMode = !isDarkMode;
+                    this.isDarkMode = !this.isDarkMode;
                     localStorage.setItem('app_theme_dark', JSON.stringify(this.isDarkMode));
                     this.$nextTick(() => {
                         this.renderProgressChart();
@@ -2225,6 +2175,33 @@
                         case 'planner': return 'Revision Scheduler';
                         case 'resources': return 'Trusted Resources';
                         default: return 'Anesthesia MD';
+                    }
+                },
+
+                // Progressive Web App (PWA) inline service worker registration
+                registerServiceWorker() {
+                    if ('serviceWorker' in navigator) {
+                        window.addEventListener('load', () => {
+                            const swCode = `
+                                const CACHE_NAME = 'anesthesia-md-v1';
+                                self.addEventListener('install', e => {
+                                    self.skipWaiting();
+                                });
+                                self.addEventListener('activate', e => {
+                                    e.waitUntil(self.clients.claim());
+                                });
+                                self.addEventListener('fetch', e => {
+                                    e.respondWith(fetch(e.request).catch(() => new Response("Offline Fallback")));
+                                });
+                            `;
+                            const blob = new Blob([swCode], { type: 'application/javascript' });
+                            const swUrl = URL.createObjectURL(blob);
+                            navigator.serviceWorker.register(swUrl).then(() => {
+                                console.log("Inline PWA Service Worker Registered.");
+                            }).catch(err => {
+                                console.warn("PWA Service worker skipped. Host on HTTPS/localhost to install.");
+                            });
+                        });
                     }
                 },
 
